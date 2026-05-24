@@ -440,7 +440,7 @@ const ToastProvider = ({ children }) => {
     return (
         <ToastContext.Provider value={{ addToast }}>
             {children}
-            <div className="fixed bottom-6 right-6 z- flex flex-col gap-2">
+            <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
                 {toasts.map(t => (
                     <div key={t.id} className={`px-4 py-3 rounded-xl shadow-lg text-sm font-bold text-white animate-slide-in-right flex items-center gap-2 ${t.type === 'error' ? 'bg-red-500' : t.type === 'warning' ? 'bg-orange-500' : 'bg-green-500'}`}>
                         <Icon name={t.type === 'error' ? 'X' : 'Check'} size={16} />
@@ -544,7 +544,7 @@ if (!position.show) return null;
 const format = (cmd, value = null) => { document.execCommand(cmd, false, value); };
 
 return (
-<div className="fixed z- flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
+<div className="fixed z-50 flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
 <button onClick={() => format('bold')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="عريض"><Icon name="Bold" size={14}/></button>
 <button onClick={() => format('italic')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="مائل"><Icon name="Italic" size={14}/></button>
 <div className="w-px h-4 bg-gray-700 mx-1"></div>
@@ -556,7 +556,7 @@ return (
 );
 };
 
-// ==================== TOP TOOLBAR COMPONENT ====================
+// ==================== TOP TOOLBAR COMPONENT (مصلح ومفعّل بالكامل) ====================
 const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus, setIsLivePreviewOpen }) => {
     const { state } = useContext(AppContext);
     const { addToast } = useContext(ToastContext);
@@ -567,20 +567,25 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
         setTimeout(() => addToast('تم نشر الموقع بنجاح!', 'success'), 1500);
     };
 
-    // دالة المعاينة الجديدة والذكية والآمنة 100% التي تفتح الواجهة الفورية بدون روابط تالفة
+    // الدالة المحدثة والآمنة 100% التي تفتح الواجهة الفورية
     const handlePreviewClick = () => {
-        localStorage.setItem('storeBuilderPreviewState', JSON.stringify({
-            pages: state.pages,
-            headerSettings: state.headerSettings,
-            themeColors: state.themeColors,
-            hoverEffects: state.hoverEffects,
-            activePage: state.activePage
-        }));
-        setIsLivePreviewOpen(true);
+        try {
+            localStorage.setItem('storeBuilderPreviewState', JSON.stringify({
+                pages: state.pages,
+                headerSettings: state.headerSettings,
+                themeColors: state.themeColors,
+                hoverEffects: state.hoverEffects,
+                activePage: state.activePage
+            }));
+            setIsLivePreviewOpen(true); // الآن ستعمل بدون أي أخطاء
+        } catch (e) {
+            console.error(e);
+            addToast('فشل في تحضير بيانات المعاينة الحية', 'error');
+        }
     };
 
     return (
-        <header className="glass-panel shadow-soft h-16 flex items-center justify-between px-6 border-b border-gray-200 fixed top-0 w-full z-">
+        <header className="glass-panel shadow-soft h-16 flex items-center justify-between px-6 border-b border-gray-200 fixed top-0 w-full z-40">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-medium">
@@ -634,6 +639,9 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
         </header>
     );
 };
+
+// === نهاية المرحلة الأولى - يرجى النسخ حتى هنا ثم الانتظار ===
+
 
 // ==================== SIDEBAR COMPONENT ====================
 const Sidebar = () => {
@@ -1682,10 +1690,10 @@ const Canvas = ({ viewport }) => {
             >
                 {viewport === 'mobile' && (
                     <>
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z- pointer-events-none flex items-center justify-center">
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z-50 pointer-events-none flex items-center justify-center">
                             <div className="w-2 h-2 rounded-full bg-[#0f172a] ml-12"></div>
                         </div>
-                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#1e293b] rounded-full z- pointer-events-none"></div>
+                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#1e293b] rounded-full z-50 pointer-events-none"></div>
                     </>
                 )}
 
@@ -1791,9 +1799,9 @@ const FullScreenPreview = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-white z- overflow-y-auto flex flex-col" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto flex flex-col" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
             {/* زر العودة الذكي العائم لإغلاق المعاينة والعودة للـ Editor */}
-            <button onClick={onClose} className="fixed bottom-6 left-6 z- bg-gray-900/90 text-white backdrop-blur px-5 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 border border-white/10 hover:bg-black transition-all active:scale-95 text-sm animate-bounce">
+            <button onClick={onClose} className="fixed bottom-6 left-6 z-50 bg-gray-900/90 text-white backdrop-blur px-5 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 border border-white/10 hover:bg-black transition-all active:scale-95 text-sm animate-bounce">
                 <Icon name="X" size={16} /> العودة إلى لوحة التحكم
             </button>
 
