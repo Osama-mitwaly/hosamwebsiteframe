@@ -8,7 +8,7 @@
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2 family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
 --bg-primary: #f8fafc;
@@ -312,7 +312,7 @@ const filteredPages = state.pages.filter(page => !pagesToDelete.includes(page.id
 return {
 ...state,
 pages: filteredPages,
-activePage: filteredPages[0]?.id || null
+activePage: filteredPages?.id || null
 };
 }
 case 'UPDATE_PAGE_SETTINGS': {
@@ -401,7 +401,7 @@ Header: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="
 Check: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20,6 9,17 4,12"/></svg>,
 ChevronDown: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"/></svg>,
 Bold: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>,
-Italic: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>,
+Italic: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" py2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>,
 Facebook: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
 Instagram: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>,
 Twitter: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>,
@@ -440,7 +440,7 @@ const ToastProvider = ({ children }) => {
     return (
         <ToastContext.Provider value={{ addToast }}>
             {children}
-            <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2">
+            <div className="fixed bottom-6 right-6 z- flex flex-col gap-2">
                 {toasts.map(t => (
                     <div key={t.id} className={`px-4 py-3 rounded-xl shadow-lg text-sm font-bold text-white animate-slide-in-right flex items-center gap-2 ${t.type === 'error' ? 'bg-red-500' : t.type === 'warning' ? 'bg-orange-500' : 'bg-green-500'}`}>
                         <Icon name={t.type === 'error' ? 'X' : 'Check'} size={16} />
@@ -544,7 +544,7 @@ if (!position.show) return null;
 const format = (cmd, value = null) => { document.execCommand(cmd, false, value); };
 
 return (
-<div className="fixed z-[100] flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
+<div className="fixed z- flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
 <button onClick={() => format('bold')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="عريض"><Icon name="Bold" size={14}/></button>
 <button onClick={() => format('italic')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="مائل"><Icon name="Italic" size={14}/></button>
 <div className="w-px h-4 bg-gray-700 mx-1"></div>
@@ -556,8 +556,8 @@ return (
 );
 };
 
-// ==================== TOP TOOLBAR COMPONENT (مصلح) ====================
-const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus }) => {
+// ==================== TOP TOOLBAR COMPONENT ====================
+const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus, setIsLivePreviewOpen }) => {
     const { state } = useContext(AppContext);
     const { addToast } = useContext(ToastContext);
     const fileInputRef = useRef(null);
@@ -567,40 +567,20 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
         setTimeout(() => addToast('تم نشر الموقع بنجاح!', 'success'), 1500);
     };
 
-    // الدالة المحدثة والمصلحة تماماً للعمل على كافة الأجهزة والهواتف
-    const handlePreview = () => {
-        try {
-            const previewData = {
-                pages: state.pages,
-                headerSettings: state.headerSettings,
-                themeColors: state.themeColors,
-                hoverEffects: state.hoverEffects,
-                activePage: state.activePage
-            };
-            
-            // تحويل البيانات إلى نص بدقة عالية
-            const jsonString = JSON.stringify(previewData);
-            
-            // استخدام تكتيك متطور للتشفير يدعم الحروف العربية بالكامل دون تلف عبر متصفحات الجوال
-            const utf8Bytes = new TextEncoder().encode(jsonString);
-            const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
-            const base64Data = btoa(binaryString);
-            
-            // بناء الرابط البرمجي النظيف بدون استخدام المصفوفات التالفة
-            // نستخدم origin و pathname لضمان نظافة الرابط
-            const baseUrl = window.location.origin + window.location.pathname;
-            const previewUrl = baseUrl + '?preview=true&data=' + encodeURIComponent(base64Data);
-            
-            // فتح الرابط في تبويب جديد
-            window.open(previewUrl, '_blank');
-        } catch (e) {
-            console.error(e);
-            addToast('حدث خطأ أثناء تشفير بيانات المعاينة', 'error');
-        }
+    // دالة المعاينة الجديدة والذكية والآمنة 100% التي تفتح الواجهة الفورية بدون روابط تالفة
+    const handlePreviewClick = () => {
+        localStorage.setItem('storeBuilderPreviewState', JSON.stringify({
+            pages: state.pages,
+            headerSettings: state.headerSettings,
+            themeColors: state.themeColors,
+            hoverEffects: state.hoverEffects,
+            activePage: state.activePage
+        }));
+        setIsLivePreviewOpen(true);
     };
 
     return (
-        <header className="glass-panel shadow-soft h-16 flex items-center justify-between px-6 border-b border-gray-200 fixed top-0 w-full z-[60]">
+        <header className="glass-panel shadow-soft h-16 flex items-center justify-between px-6 border-b border-gray-200 fixed top-0 w-full z-">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-medium">
@@ -643,8 +623,8 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
                 <div className="h-8 w-px bg-gray-200 mx-1"></div>
                 
                 <div className="flex items-center gap-2">
-                    <button onClick={handlePreview} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium">
-                        <Icon name="Eye" size={16} /> معاينة
+                    <button onClick={handlePreviewClick} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium">
+                        <Icon name="Eye" size={16} /> معاينة المتجر حياً
                     </button>
                     <button onClick={handlePublish} className="btn-primary flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold shadow-md hover:shadow-lg">
                         <Icon name="Globe" size={16} /> نشر الموقع
@@ -774,7 +754,7 @@ const saveHistory = () => {
 dispatch({ type: 'SAVE_HISTORY' });
 };
 const handleLogoUpload = async (e) => {
-const file = e.target.files[0];
+const file = e.target.files;
 if (file) {
 const base64Url = await fileToBase64(file);
 handleUpdateLive({ logoImage: base64Url });
@@ -992,9 +972,7 @@ const ThemeSettings = () => {
     );
 };
 
-/* ===== نهاية المرحلة الأولى - قم بنسخ الكود أعلاه وألصقه في الملف، ثم انتقل للمرحلة الثانية =====*/
-
-// ==================== HERO SECTION COMPONENT المطور بحرية كاملة ====================
+// ==================== HERO SECTION COMPONENT ====================
 const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
     const {
         title, subtitle, buttonText, showButton = true, overlay, textColor,
@@ -1022,20 +1000,20 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
         <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`relative w-full ${heightClasses[bannerHeight]} overflow-hidden transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             {mediaType === 'video' ? (
                 <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
-                    <source src={mediaUrls[0]} type="video/mp4" />
+                    <source src={mediaUrls} type="video/mp4" />
                 </video>
             ) : mediaType === 'slider' ? (
                 mediaUrls.map((url, i) => (
                     <div key={i} className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000" style={{ backgroundImage: `url(${url})`, opacity: i === currentSlide ? 1 : 0 }}></div>
                 ))
             ) : (
-                <div className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url(${mediaUrls[0] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'})` }}></div>
+                <div className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url(${mediaUrls || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'})` }}></div>
             )}
             <div className="absolute inset-0 bg-black pointer-events-none" style={{ opacity: (overlay !== undefined ? overlay : 40) / 100 }}></div>
             <div className={`relative z-10 flex flex-col h-full w-full ${heightClasses[bannerHeight]} px-8 md:px-16 ${positionClasses[contentPosition]} ${alignClasses[contentAlign]}`}>
                 <h1
                     data-placeholder="عنوان البانر الرئيسي"
-                    contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })}
+                    contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })}
                     className="font-bold max-w-4xl font-display leading-tight"
                     style={{ color: textColor, fontSize: `${titleSize}px`, marginBottom: `${titleGutter}px` }}
                 >
@@ -1043,7 +1021,7 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
                 </h1>
                 <p
                     data-placeholder="أضف وصفاً جذاباً لمنتجك أو خدمتك هنا..."
-                    contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { subtitle: e.target.innerText })}
+                    contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { subtitle: e.target.innerText })}
                     className="max-w-2xl leading-relaxed"
                     style={{ color: textColor, fontSize: `${subtitleSize}px`, marginBottom: `${subtitleGutter}px` }}
                 >
@@ -1062,7 +1040,7 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
                             paddingBottom: `${btnPaddingY}px` 
                         }}
                     >
-                        <span data-placeholder="نص الزر" contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText !== undefined ? buttonText : 'تسوق الآن'}</span>
+                        <span data-placeholder="نص الزر" contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText !== undefined ? buttonText : 'تسوق الآن'}</span>
                     </button>
                 )}
             </div>
@@ -1070,7 +1048,7 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
     );
 };
 
-// ==================== PRODUCTS SECTION COMPONENT (محدث) ====================
+// ==================== PRODUCTS SECTION COMPONENT ====================
 const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
     const { 
         title, cardStyle = 'style1', showAddToCart = true, showRating = true, columns, columnsTablet, columnsMobile
@@ -1083,22 +1061,22 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
     };
 
     const allProducts = [
-        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين', price: '60.00', oldPrice: '75.00', category: 'ملابس', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
-        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف', price: '45.00', oldPrice: null, category: 'أحذية', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
-        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة', price: '50.00', oldPrice: '60.00', category: 'ساعات', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
-        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري', price: '50.00', oldPrice: '60.00', category: 'ملابس', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
+        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين مميز للغاية', price: '60.00', oldPrice: '75.00', category: 'ملابس', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
+        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف مرن ومقاوم للصدمات', price: '45.00', oldPrice: null, category: 'أحذية', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
+        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة ومقاومة للماء سير جلد', price: '50.00', oldPrice: '60.00', category: 'ساعات', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
+        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري راقي جداً', price: '50.00', oldPrice: '60.00', category: 'ملابس', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
     ];
 
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-3 md:p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
-            <div className="max-w-7xl mx-auto py-4">
-                <div className="flex flex-col items-center mb-6">
-                    <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان قسم المنتجات" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-xl md:text-3xl font-bold font-display text-gray-800 mb-4 text-center">
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-2.5 md:p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            <div className="max-w-7xl mx-auto py-2">
+                <div className="flex flex-col items-center mb-5">
+                    <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم المنتجات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-xl md:text-3xl font-bold font-display text-gray-800 mb-2 text-center">
                         {title !== undefined ? title : 'منتجاتنا المميزة'}
                     </h3>
                 </div>
 
-                <div className="grid gap-3 md:gap-6" style={{ gridTemplateColumns: `repeat(${getColumns()}, minmax(0, 1fr))` }}>
+                <div className="grid gap-2.5 md:gap-6" style={{ gridTemplateColumns: `repeat(${getColumns()}, minmax(0, 1fr))` }}>
                     {allProducts.map(product => {
                         const hasDiscount = product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price);
                         const discountPercent = hasDiscount ? Math.round(((parseFloat(product.oldPrice) - parseFloat(product.price)) / parseFloat(product.oldPrice)) * 100) : 0;
@@ -1107,47 +1085,47 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
                             <div key={product.id} className="product-card group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-soft flex flex-col h-full relative transition-all duration-300">
                                 
                                 {hasDiscount && (
-                                    <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm select-none">
+                                    <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] md:text-[11px] font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-sm select-none">
                                         {discountPercent}%-
                                     </div>
                                 )}
 
                                 {cardStyle === 'style2' && (
-                                    <div className="flex items-center justify-between p-2.5 border-b border-gray-50 bg-gray-50/50">
-                                        <span className="font-bold text-blue-700 text-xs truncate max-w-[70%]">{product.company}</span>
-                                        <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm text-xs border border-gray-100 shrink-0">{product.logo}</div>
+                                    <div className="flex items-center justify-between p-2 md:p-2.5 border-b border-gray-50 bg-gray-50/50">
+                                        <span className="font-bold text-blue-700 text-[10px] md:text-xs truncate max-w-[70%]">{product.company}</span>
+                                        <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white flex items-center justify-center shadow-sm text-[10px] md:text-xs border border-gray-100 shrink-0">{product.logo}</div>
                                     </div>
                                 )}
 
-                                <div className="w-full aspect-[4/4] p-3 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
+                                <div className="w-full aspect-square p-2.5 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
                                     <img src={product.image} alt={product.name} className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" />
                                 </div>
                                 
-                                <div className="p-3 md:p-4 flex flex-col flex-1 text-center bg-white">
-                                    <h4 className="text-gray-700 font-semibold mb-1.5 text-xs md:text-sm leading-tight line-clamp-2 h-8 md:h-10 text-right md:text-center">{product.name}</h4>
+                                <div className="p-2.5 md:p-4 flex flex-col flex-1 text-right md:text-center bg-white">
+                                    <h4 className="text-gray-700 font-semibold mb-1 text-[11px] md:text-sm leading-tight line-clamp-2 h-7 md:h-10 text-right md:text-center">{product.name}</h4>
                                     
                                     <div className="mt-auto">
                                         {showRating !== false && (
-                                            <div className="flex gap-0.5 mb-2 justify-start md:justify-center">
+                                            <div className="flex gap-0.5 mb-1.5 justify-start md:justify-center">
                                                 {[...Array(5)].map((_, i) => (
-                                                    <Icon key={i} name="Star" size={11} className={i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"} />
+                                                    <Icon key={i} name="Star" size={10} className={i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"} />
                                                 ))}
                                             </div>
                                         )}
                                         
-                                        <div className="flex items-center justify-start md:justify-center gap-1.5 mb-3" dir="rtl">
-                                            <span className="font-extrabold text-sm md:text-base text-gray-900">
-                                                {product.price} <span className="text-[10px] md:text-xs font-normal text-gray-500">ر.س</span>
+                                        <div className="flex items-center justify-start md:justify-center gap-1.5 mb-2.5" dir="rtl">
+                                            <span className="font-extrabold text-xs md:text-base text-gray-900">
+                                                {product.price} <span className="text-[9px] md:text-xs font-normal text-gray-500">ر.س</span>
                                             </span>
                                             {hasDiscount && (
-                                                <span className="text-[11px] md:text-xs text-gray-400 line-through decoration-gray-400">{product.oldPrice} ر.س</span>
+                                                <span className="text-[10px] md:text-xs text-gray-400 line-through decoration-gray-400">{product.oldPrice} ر.س</span>
                                             )}
                                         </div>
 
                                         {showAddToCart !== false && (
-                                            <button className="w-full py-2 rounded-2xl text-xs font-bold text-[#1e293b] bg-orange-100 hover:bg-orange-200/80 transition-all duration-200 flex items-center justify-center gap-1.5 border border-orange-200/40 shadow-sm active:scale-95">
-                                                <Icon name="ShoppingCart" size={13} className="text-[#1e293b]" />
-                                                إضافة إلى السلة
+                                            <button className="w-full py-1.5 md:py-2 rounded-2xl text-[10px] md:text-xs font-bold text-[#1e293b] bg-orange-100 hover:bg-orange-200/80 transition-all duration-200 flex items-center justify-center gap-1 border border-orange-200/40 shadow-sm active:scale-95">
+                                                <Icon name="ShoppingCart" size={12} className="text-[#1e293b]" />
+                                                إضافة للسلة
                                             </button>
                                         )}
                                     </div>
@@ -1174,9 +1152,9 @@ const CategoriesSection = ({ section, isSelected, onSelect, onUpdate, viewport }
     const positionClasses = { top: 'justify-start pt-6 pb-4', center: 'justify-center py-4', bottom: 'justify-end pt-4 pb-6' };
 
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className="max-w-7xl mx-auto py-8">
-                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان قسم الفئات" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold font-display text-gray-800 mb-8 text-center">{title}</h3>
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم الفئات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold font-display text-gray-800 mb-8 text-center">{title}</h3>
                 <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: `repeat(${getCols()}, minmax(0, 1fr))` }}>
                     {categories.map((cat, i) => (
                         <div key={cat.id || i} className="relative group overflow-hidden rounded-2xl aspect-[4/5] md:aspect-[4/3] shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
@@ -1202,7 +1180,7 @@ const BannerSection = ({ section, isSelected, onSelect, onUpdate }) => {
     const justifyClasses = { top: 'justify-start', center: 'justify-center', bottom: 'justify-end' };
 
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className={`relative rounded-3xl overflow-hidden shadow-medium w-full flex flex-col transition-all duration-300 ${heightClasses[bannerHeight]}`} style={{ backgroundColor: bgColor }}>
                 {bgImage && <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: `url(${bgImage})` }}></div>}
                 <div className="absolute inset-0 bg-black pointer-events-none transition-opacity" style={{ opacity: overlayOpacity / 100 }}></div>
@@ -1210,13 +1188,13 @@ const BannerSection = ({ section, isSelected, onSelect, onUpdate }) => {
                     <div className={`flex flex-col flex-1 ${alignClasses[contentAlign]} justify-center`}>
                         {showText !== false && (
                             <>
-                                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان البانر" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display leading-tight drop-shadow-md" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title !== undefined ? title : 'عرض خاص'}</h3>
-                                <p contentEditable suppressContentEditableWarning data-placeholder="وصف البانر" onBlur={(e) => onUpdate(section.id, { description: e.target.innerText })} className="mb-6 max-w-xl text-lg drop-shadow-sm" style={{ color: textColor, opacity: 0.9 }}>{description !== undefined ? description : 'احصل على خصم 50% على جميع المنتجات'}</p>
+                                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display leading-tight drop-shadow-md" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title !== undefined ? title : 'عرض خاص'}</h3>
+                                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="وصف البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { description: e.target.innerText })} className="mb-6 max-w-xl text-lg drop-shadow-sm" style={{ color: textColor, opacity: 0.9 }}>{description !== undefined ? description : 'احصل على خصم 50% على جميع المنتجات'}</p>
                             </>
                         )}
                         {showButton !== false && (
                             <button className="px-8 py-3.5 rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg border border-white/20 hover:shadow-xl" style={{ backgroundColor: btnColor, color: btnTextColor }}>
-                                <span data-placeholder="نص الزر" contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText || 'تسوق الآن'}</span>
+                                <span data-placeholder="نص الزر" contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText || 'تسوق الآن'}</span>
                             </button>
                         )}
                     </div>
@@ -1241,9 +1219,9 @@ const FeaturesSection = ({ section, isSelected, onSelect, onUpdate }) => {
     ] } = section.props || {};
     
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className="max-w-6xl mx-auto">
-                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان القسم" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl font-bold mb-10 font-display text-center text-gray-800">{title}</h3>
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان القسم" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl font-bold mb-10 font-display text-center text-gray-800">{title}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {features.map((f) => (
                         <div key={f.id} className="text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-soft hover:shadow-medium transition-all group">
@@ -1263,11 +1241,11 @@ const FeaturesSection = ({ section, isSelected, onSelect, onUpdate }) => {
 const NewsletterSection = ({ section, isSelected, onSelect, onUpdate }) => {
     const { title = 'اشترك في نشرتنا البريدية', subtitle = 'احصل على أحدث العروض والخصومات', bgColor = '#f8fafc', textColor = '#1e293b' } = section.props || {};
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-16 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-16 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
             <div className="max-w-2xl mx-auto text-center">
                 <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600"><Icon name="Mail" size={28} /></div>
-                <h3 contentEditable suppressContentEditableWarning data-placeholder="العنوان" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold mb-3 font-display">{title}</h3>
-                <p contentEditable suppressContentEditableWarning data-placeholder="الوصف" onBlur={(e) => onUpdate(section.id, { subtitle: e.target.innerText })} className="mb-8 opacity-80">{subtitle}</p>
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="العنوان" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold mb-3 font-display">{title}</h3>
+                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="الوصف" onBlur={(e) => onUpdate && onUpdate(section.id, { subtitle: e.target.innerText })} className="mb-8 opacity-80">{subtitle}</p>
                 <div className="flex gap-2 max-w-md mx-auto bg-white p-1.5 rounded-xl shadow-sm border border-gray-200">
                     <input type="email" placeholder="بريدك الإلكتروني..." className="flex-1 px-4 py-2 outline-none bg-transparent text-gray-800 text-sm" disabled />
                     <button className="px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90" style={{ backgroundColor: 'var(--accent, #3b82f6)' }}>اشتراك</button>
@@ -1282,7 +1260,7 @@ const FooterSection = ({ section, isSelected, onSelect }) => {
     const { bgColor = '#1e293b', textColor = '#f8fafc' } = section.props || {};
 
     return (
-        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-10 mb-10 justify-between">
                     <div className="flex-1">
@@ -1392,7 +1370,7 @@ case 'banner': return <BannerSection {...props} />;
 case 'features': return <FeaturesSection {...props} />;
 case 'newsletter': return <NewsletterSection {...props} />;
 case 'footer': return <FooterSection {...props} />;
-default: return <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 bg-white ${isSelected ? 'section-selected' : ''}`}><h3 className="text-xl font-bold">{section.type}</h3></div>;
+default: return <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-6 bg-white ${isSelected ? 'section-selected' : ''}`}><h3 className="text-xl font-bold">{section.type}</h3></div>;
 }
 };
 
@@ -1428,7 +1406,7 @@ case 'hero':
                         const newUrls = await Promise.all(files.map(f => fileToBase64(f)));
                         const currentUrls = heroProps.mediaUrls || [];
                         handleUpdate({
-                            mediaUrls: heroProps.mediaType === 'slider' ? [...currentUrls, ...newUrls] : [newUrls[0]]
+                            mediaUrls: heroProps.mediaType === 'slider' ? [...currentUrls, ...newUrls] : [newUrls]
                         });
                     }
                     e.target.value = '';
@@ -1474,7 +1452,6 @@ case 'hero':
                             </div>
                         </div>
 
-                        {/* تحكم حر ومتقدم في النصوص والمسافات */}
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
                             <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">التحكم الحر في النصوص والمواقع</h5>
                             <div className="grid grid-cols-2 gap-2 mt-2">
@@ -1504,7 +1481,6 @@ case 'hero':
                             <ColorPickerWithDropper label="لون النصوص" value={heroProps.textColor || '#ffffff'} onChange={(val) => handleUpdateLive({ textColor: val })} onBlur={saveHistory} />
                         </div>
 
-                        {/* تحكم متقدم في مظهر وحجم وأبعاد الزر */}
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
                             <div className="flex items-center justify-between border-b pb-1 mb-2">
                                 <h5 className="text-[11px] font-bold text-gray-700">الزر (CTA)</h5>
@@ -1616,7 +1592,7 @@ return (
 );
 };
 
-// ==================== CANVAS COMPONENT (معدل) ====================
+// ==================== CANVAS COMPONENT ====================
 const Canvas = ({ viewport }) => {
     const { state, dispatch } = useContext(AppContext);
     const canvasRef = useRef(null);
@@ -1706,10 +1682,10 @@ const Canvas = ({ viewport }) => {
             >
                 {viewport === 'mobile' && (
                     <>
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z-[110] pointer-events-none flex items-center justify-center">
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z- pointer-events-none flex items-center justify-center">
                             <div className="w-2 h-2 rounded-full bg-[#0f172a] ml-12"></div>
                         </div>
-                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#1e293b] rounded-full z-[110] pointer-events-none"></div>
+                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#1e293b] rounded-full z- pointer-events-none"></div>
                     </>
                 )}
 
@@ -1770,45 +1746,22 @@ const Canvas = ({ viewport }) => {
     );
 };
 
-// ==================== PUBLIC STORE VIEW COMPONENT (مصلح) ====================
-// هذا المكون يعرض المتجر الإلكتروني كاملاً للمستخدم النهائي بدون الـ Editor
-const PublicStoreView = () => {
+// ==================== IN-PAGE CLEAN PUBLIC PREVIEW COMPONENT ====================
+const FullScreenPreview = ({ isOpen, onClose }) => {
     const [storeState, setStoreState] = useState(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // جلب البيانات المشفرة القادمة من رابط الـ URL مباشرة
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('data');
-        
-        if (encodedData) {
-            try {
-                // فك التشفير المعاكس والآمن تماماً للغة العربية على الجوال
-                const decodedBase64 = atob(decodeURIComponent(encodedData));
-                const binaryLen = decodedBase64.length;
-                const bytes = new Uint8Array(binaryLen);
-                for (let i = 0; i < binaryLen; i++) {
-                    bytes[i] = decodedBase64.charCodeAt(i);
-                }
-                const decodedJson = new TextDecoder().decode(bytes);
-                setStoreState(JSON.parse(decodedJson));
-            } catch (e) {
-                console.error("خطأ في فك تشفير بيانات الرابط", e);
-                // محاولة احتياطية من الذاكرة
-                const localData = localStorage.getItem('storeBuilderPreviewState');
-                if (localData) setStoreState(JSON.parse(localData));
+        if (isOpen) {
+            const savedData = localStorage.getItem('storeBuilderPreviewState');
+            if (savedData) {
+                try { setStoreState(JSON.parse(savedData)); } catch(e) { console.error(e); }
             }
-        } else {
-            const localData = localStorage.getItem('storeBuilderPreviewState');
-            if (localData) setStoreState(JSON.parse(localData));
         }
-        setLoading(false);
-    }, []);
+    }, [isOpen]);
 
-    if (loading) return <div className="h-screen w-full flex items-center justify-center bg-gray-50 font-bold">جاري تحميل المعاينة...</div>;
-    if (!storeState) return <div className="h-screen w-full flex items-center justify-center bg-gray-50 text-red-500 font-bold">لم يتم العثور على بيانات للتصميم، يرجى تشغيل المعاينة من داخل الـ Editor أولاً.</div>;
+    if (!isOpen || !storeState) return null;
 
-    const activePage = storeState.pages.find(p => p.id === storeState.activePage) || storeState.pages[0];
+    const activePage = storeState.pages.find(p => p.id === storeState.activePage) || storeState.pages;
     const sections = activePage?.sections || [];
     const isImmersive = activePage?.heroMode === 'immersive';
     const headerTransparency = activePage?.headerTransparency || 0;
@@ -1817,7 +1770,6 @@ const PublicStoreView = () => {
     const footerSection = sections.find(s => s.type === 'footer');
     const movableSections = sections.filter(s => s.type !== 'hero' && s.type !== 'footer');
 
-    // دوال وتقنيات العرض النظيف
     const hexToRgba = (hex, alpha) => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; };
     const headerAlpha = 1 - (headerTransparency / 100);
     const topBarBg = isImmersive ? hexToRgba(storeState.headerSettings.topBarBgColor, headerAlpha) : storeState.headerSettings.topBarBgColor;
@@ -1825,7 +1777,7 @@ const PublicStoreView = () => {
     const navIconColor = storeState.headerSettings.navIconColor || storeState.headerSettings.navTextColor;
 
     const renderStaticSection = (section) => {
-        const props = { section, isSelected: false, onSelect: () => {}, onUpdate: () => {}, viewport: 'desktop' };
+        const props = { section, isSelected: false, onSelect: null, onUpdate: null, viewport: window.innerWidth < 768 ? 'mobile' : 'desktop' };
         switch (section.type) {
             case 'hero': return <HeroSection {...props} />;
             case 'products': return <ProductsSection {...props} />;
@@ -1839,9 +1791,12 @@ const PublicStoreView = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-white flex flex-col overflow-x-hidden" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
-            
-            {/* الترويسة النظيفة */}
+        <div className="fixed inset-0 bg-white z- overflow-y-auto flex flex-col" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
+            {/* زر العودة الذكي العائم لإغلاق المعاينة والعودة للـ Editor */}
+            <button onClick={onClose} className="fixed bottom-6 left-6 z- bg-gray-900/90 text-white backdrop-blur px-5 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 border border-white/10 hover:bg-black transition-all active:scale-95 text-sm animate-bounce">
+                <Icon name="X" size={16} /> العودة إلى لوحة التحكم
+            </button>
+
             <div className={isImmersive ? 'absolute top-0 left-0 right-0 z-50 w-full' : 'w-full shrink-0'}>
                 {activePage?.showTopBar && storeState.headerSettings.topBarVisible && (
                     <div className="py-2 px-6 flex items-center justify-between text-xs font-medium" style={{ backgroundColor: topBarBg, color: storeState.headerSettings.topBarTextColor }}>
@@ -1851,7 +1806,6 @@ const PublicStoreView = () => {
                             ))}
                         </div>
                         <div className="flex-1 text-center order-2 px-4">{storeState.headerSettings.topBarText}</div>
-                        <div className="w-px order-2"></div>
                     </div>
                 )}
                 <nav className="py-4 px-8 flex items-center w-full gap-4" style={{ backgroundColor: navBarBg, color: storeState.headerSettings.navTextColor, borderBottom: activePage?.headerTransparency > 20 ? 'none' : '1px solid rgba(226, 232, 240, 0.5)' }}>
@@ -1872,9 +1826,8 @@ const PublicStoreView = () => {
                 </nav>
             </div>
 
-            {/* الأقسام والمحتوى النظيف */}
             <div className="flex-1 flex flex-col w-full">
-                {heroSection && <div style={isImmersive ? { marginTop: '0' } : {}}>{renderStaticSection(heroSection)}</div>}
+                {heroSection && <div>{renderStaticSection(heroSection)}</div>}
                 {movableSections.map(section => (
                     <div key={section.id} className="w-full">
                         {renderStaticSection(section)}
@@ -1891,6 +1844,7 @@ const MainAppContent = () => {
     const [state, dispatch] = useReducer(appReducer, initialState);
     const [viewport, setViewport] = useState('desktop');
     const [autoSaveStatus, setAutoSaveStatus] = useState('saved');
+    const [isLivePreviewOpen, setIsLivePreviewOpen] = useState(false);
     const { addToast } = useContext(ToastContext);
     
     useEffect(() => {
@@ -1899,13 +1853,12 @@ const MainAppContent = () => {
                 localStorage.setItem('storeBuilderProState', JSON.stringify({ pages: state.pages, activePage: state.activePage, headerSettings: state.headerSettings, themeColors: state.themeColors, hoverEffects: state.hoverEffects }));
                 setAutoSaveStatus('saved');
             } catch (e) {
-                addToast('فشل الحفظ: المساحة ممتلئة.', 'error');
                 setAutoSaveStatus('error');
             }
         }, 800);
         setAutoSaveStatus('saving');
         return () => clearTimeout(saveTimeout);
-    }, [state, addToast]);
+    }, [state]);
     
     useEffect(() => {
         const saved = localStorage.getItem('storeBuilderProState');
@@ -1926,7 +1879,7 @@ const MainAppContent = () => {
     };
     
     const handleImport = (e) => { 
-        const file = e.target.files[0]; 
+        const file = e.target.files; 
         if (file) { 
             const reader = new FileReader(); 
             reader.onload = (event) => { 
@@ -1954,7 +1907,7 @@ const MainAppContent = () => {
         <AppContext.Provider value={{ state, dispatch }}>
             <div className="h-screen w-full flex flex-col overflow-hidden relative bg-gray-50" style={{ fontFamily: state.themeColors.fontFamily || 'Cairo' }}>
                 <FloatingToolbar />
-                <TopToolbar viewport={viewport} setViewport={setViewport} onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} onExport={handleExport} onImport={handleImport} autoSaveStatus={autoSaveStatus} />
+                <TopToolbar viewport={viewport} setViewport={setViewport} onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} onExport={handleExport} onImport={handleImport} autoSaveStatus={autoSaveStatus} setIsLivePreviewOpen={setIsLivePreviewOpen} />
                 
                 <div className="fixed top-16 right-0 bottom-0 z-40 pointer-events-none w-80">
                     <div className="pointer-events-auto h-full w-full relative">
@@ -1971,29 +1924,19 @@ const MainAppContent = () => {
                 <div className="flex-1 w-full pt-16 relative z-0 flex overflow-hidden">
                     <Canvas viewport={viewport} />
                 </div>
+
+                {/* تفعيل شاشة المعاينة الفورية بملء الشاشة لتعمل على الجوال والكمبيوتر فوراً بسلاسة تامة */}
+                <FullScreenPreview isOpen={isLivePreviewOpen} onClose={() => setIsLivePreviewOpen(false)} />
             </div>
         </AppContext.Provider>
     );
 };
 
-// ==================== APP ROUTER SELECTOR ====================
-const App = () => {
-    // فحص الرابط الحالي إذا كان يحمل طلب المعاينة الخارجية المباشرة
-    const urlParams = new URLSearchParams(window.location.search);
-    const isPreviewMode = urlParams.get('preview') === 'true';
-
-    if (isPreviewMode) {
-        // تشغيل واجهة المتجر الحرة والنظيفة تماماً
-        return <PublicStoreView />;
-    }
-
-    // تشغيل نظام الـ Editor الكامل مع الـ Toast المعتاد
-    return (
-        <ToastProvider>
-            <MainAppContent />
-        </ToastProvider>
-    );
-};
+const App = () => (
+    <ToastProvider>
+        <MainAppContent />
+    </ToastProvider>
+);
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
