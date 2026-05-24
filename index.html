@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Store Builder Pro - Live Preview Fixed</title>
+<title>Store Builder Pro - Final Edition</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2 family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
 --bg-primary: #f8fafc;
@@ -312,7 +312,7 @@ const filteredPages = state.pages.filter(page => !pagesToDelete.includes(page.id
 return {
 ...state,
 pages: filteredPages,
-activePage: filteredPages?.id || null
+activePage: filteredPages[0]?.id || null
 };
 }
 case 'UPDATE_PAGE_SETTINGS': {
@@ -415,7 +415,8 @@ Pipette: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke=
 Truck: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-9l-5-4h-3v13h3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>,
 Shield: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
 CreditCard: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
-Headphones: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+Headphones: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>,
+Link: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
 };
 return icons[name] || null;
 };
@@ -508,55 +509,89 @@ className="w-full h-1.5 rounded-lg appearance-none cursor-pointer slider-track r
 );
 };
 
-// ==================== FLOATING TEXT TOOLBAR ====================
-const FloatingToolbar = () => {
-const [position, setPosition] = useState({ top: 0, left: 0, show: false });
-
-useEffect(() => {
-const handleSelection = () => {
-const selection = window.getSelection();
-if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
-let node = selection.anchorNode;
-let isEditable = false;
-while(node && node !== document.body) {
-if(node.getAttribute && node.getAttribute('contenteditable') === 'true') { isEditable = true; break; }
-node = node.parentNode;
-}
-if (isEditable) {
-const range = selection.getRangeAt(0);
-const rect = range.getBoundingClientRect();
-setPosition({ show: true, top: rect.top - 45, left: rect.left + (rect.width / 2) });
-} else {
-setPosition({ show: false, top: 0, left: 0 });
-}
-} else {
-setPosition({ show: false, top: 0, left: 0 });
-}
-};
-
-document.addEventListener('mouseup', handleSelection);
-document.addEventListener('keyup', handleSelection);
-return () => { document.removeEventListener('mouseup', handleSelection); document.removeEventListener('keyup', handleSelection); };
-}, []);
-
-if (!position.show) return null;
-
-const format = (cmd, value = null) => { document.execCommand(cmd, false, value); };
-
-return (
-<div className="fixed z-50 flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
-<button onClick={() => format('bold')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="عريض"><Icon name="Bold" size={14}/></button>
-<button onClick={() => format('italic')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="مائل"><Icon name="Italic" size={14}/></button>
-<div className="w-px h-4 bg-gray-700 mx-1"></div>
-<label className="p-1.5 hover:bg-gray-700 rounded cursor-pointer transition-colors relative" title="لون النص">
-<Icon name="Palette" size={14}/>
-<input type="color" onChange={(e) => format('foreColor', e.target.value)} className="absolute opacity-0 w-0 h-0" />
-</label>
-</div>
+// ==================== UNIVERSAL LINK SETTING COMPONENT ====================
+const LinkSetting = ({ label, linkType, linkValue, onChangeType, onChangeValue, pages }) => (
+    <div className="space-y-2 mt-2 p-2 bg-white rounded-lg border border-gray-100">
+        <label className="text-[10px] text-gray-500 block font-bold">{label}</label>
+        <div className="flex gap-2">
+            <select value={linkType || 'internal'} onChange={(e) => onChangeType(e.target.value)} className="input-field px-2 py-1.5 rounded-lg text-[10px] w-24 shrink-0 font-medium bg-gray-50">
+                <option value="internal">صفحة بالمتجر</option>
+                <option value="external">رابط خارجي</option>
+            </select>
+            {linkType === 'external' ? (
+                <input type="url" value={linkValue || ''} onChange={(e) => onChangeValue(e.target.value)} placeholder="https://..." className="input-field flex-1 px-2 py-1.5 rounded-lg text-[10px] text-left" dir="ltr" />
+            ) : (
+                <select value={linkValue || ''} onChange={(e) => onChangeValue(e.target.value)} className="input-field flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium">
+                    <option value="">اختر صفحة...</option>
+                    {pages.map(p => <option key={p.id} value={p.slug || p.id}>{p.name}</option>)}
+                </select>
+            )}
+        </div>
+    </div>
 );
+
+// ==================== FLOATING TEXT TOOLBAR (محدث) ====================
+const FloatingToolbar = () => {
+    const [position, setPosition] = useState({ top: 0, left: 0, show: false });
+
+    useEffect(() => {
+        const handleSelection = () => {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+                let node = selection.anchorNode;
+                let isEditable = false;
+                while(node && node !== document.body) {
+                    if(node.getAttribute && node.getAttribute('contenteditable') === 'true') { isEditable = true; break; }
+                    node = node.parentNode;
+                }
+                if (isEditable) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    setPosition({ show: true, top: rect.top - 45, left: rect.left + (rect.width / 2) });
+                } else { setPosition({ show: false, top: 0, left: 0 }); }
+            } else { setPosition({ show: false, top: 0, left: 0 }); }
+        };
+        document.addEventListener('mouseup', handleSelection);
+        document.addEventListener('keyup', handleSelection);
+        return () => { document.removeEventListener('mouseup', handleSelection); document.removeEventListener('keyup', handleSelection); };
+    }, []);
+
+    if (!position.show) return null;
+    const format = (cmd, value = null) => { document.execCommand(cmd, false, value); };
+
+    return (
+        <div className="fixed z-50 flex items-center gap-1 bg-gray-900 text-white p-1.5 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
+            <select onChange={(e) => format('fontName', e.target.value)} className="bg-gray-800 text-white text-xs p-1 rounded outline-none border border-gray-700 cursor-pointer">
+                <option value="">الخط...</option>
+                <option value="Cairo">Cairo</option>
+                <option value="Tajawal">Tajawal</option>
+                <option value="Almarai">Almarai</option>
+                <option value="Arial">Arial</option>
+            </select>
+            <select onChange={(e) => format('fontSize', e.target.value)} className="bg-gray-800 text-white text-xs p-1 rounded outline-none border border-gray-700 cursor-pointer">
+                <option value="">الحجم...</option>
+                <option value="3">صغير</option>
+                <option value="4">متوسط</option>
+                <option value="5">كبير</option>
+                <option value="6">ضخم</option>
+            </select>
+            <div className="w-px h-4 bg-gray-700 mx-1"></div>
+            <button onClick={() => format('bold')} className="p-1 hover:bg-gray-700 rounded transition-colors" title="عريض"><Icon name="Bold" size={14}/></button>
+            <button onClick={() => format('italic')} className="p-1 hover:bg-gray-700 rounded transition-colors" title="مائل"><Icon name="Italic" size={14}/></button>
+            <div className="w-px h-4 bg-gray-700 mx-1"></div>
+            <label className="p-1 hover:bg-gray-700 rounded cursor-pointer transition-colors relative flex items-center gap-1" title="لون النص">
+                <span className="text-[10px] font-bold">A</span>
+                <input type="color" onChange={(e) => format('foreColor', e.target.value)} className="absolute opacity-0 w-0 h-0" />
+            </label>
+            <label className="p-1 hover:bg-gray-700 rounded cursor-pointer transition-colors relative flex items-center gap-1" title="لون التمييز (الخلفية)">
+                <Icon name="Palette" size={12}/>
+                <input type="color" onChange={(e) => format('hiliteColor', e.target.value)} className="absolute opacity-0 w-0 h-0" />
+            </label>
+        </div>
+    );
 };
 
-// ==================== TOP TOOLBAR COMPONENT (مصلح ومفعّل بالكامل) ====================
+// ==================== TOP TOOLBAR COMPONENT ====================
 const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus, setIsLivePreviewOpen }) => {
     const { state } = useContext(AppContext);
     const { addToast } = useContext(ToastContext);
@@ -567,7 +602,6 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
         setTimeout(() => addToast('تم نشر الموقع بنجاح!', 'success'), 1500);
     };
 
-    // الدالة المحدثة والآمنة 100% التي تفتح الواجهة الفورية
     const handlePreviewClick = () => {
         try {
             localStorage.setItem('storeBuilderPreviewState', JSON.stringify({
@@ -577,7 +611,7 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
                 hoverEffects: state.hoverEffects,
                 activePage: state.activePage
             }));
-            setIsLivePreviewOpen(true); // الآن ستعمل بدون أي أخطاء
+            setIsLivePreviewOpen(true);
         } catch (e) {
             console.error(e);
             addToast('فشل في تحضير بيانات المعاينة الحية', 'error');
@@ -598,12 +632,6 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
                             <span className="text-[10px] text-gray-500">{autoSaveStatus === 'saved' ? 'تم الحفظ محلياً' : 'جاري الحفظ...'}</span>
                         </div>
                     </div>
-                </div>
-                <div className="h-8 w-px bg-gray-200 mx-2"></div>
-                <div className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 flex items-center gap-2">
-                    <span className="text-sm font-medium text-blue-700 truncate max-w-[150px]">
-                        {state.pages.find(p => p.id === state.activePage)?.name || 'لا توجد صفحة'}
-                    </span>
                 </div>
             </div>
             
@@ -640,10 +668,7 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
     );
 };
 
-// === نهاية المرحلة الأولى - يرجى النسخ حتى هنا ثم الانتظار ===
-
-
-// ==================== SIDEBAR COMPONENT ====================
+// ==================== SIDEBAR COMPONENT (محدث بالكامل) ====================
 const Sidebar = () => {
     const { state, dispatch } = useContext(AppContext);
     const [activeTab, setActiveTab] = useState('widgets');
@@ -671,46 +696,41 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className={`absolute flex flex-col bg-white/95 backdrop-blur-xl border-gray-200 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-50 ${isExpanded ? 'w-80 h-full top-0 right-0 border-l shadow-medium rounded-none' : 'w-16 h-[500px] top-1/2 -translate-y-1/2 right-4 rounded-2xl border shadow-xl'}`}>
+        <aside className={`absolute transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-50 flex flex-col ${isExpanded ? 'bg-white/95 backdrop-blur-xl border-l border-gray-200 w-80 h-full top-0 right-0 shadow-medium rounded-none pointer-events-auto' : 'w-14 h-auto top-1/2 -translate-y-1/2 right-4 bg-transparent pointer-events-none items-center'}`}>
             
-            <button 
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2 z-50 bg-white border border-gray-200 shadow-md rounded-full w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all duration-500 hover:scale-110"
-                title={isExpanded ? "طي القائمة" : "فرد القائمة"}
-            >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-500 ${!isExpanded ? 'rotate-180' : ''}`}>
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-            </button>
+            <div className={`transition-all duration-500 pointer-events-auto flex ${isExpanded ? 'flex-row border-b border-gray-200 w-full px-2 pt-2 bg-transparent' : 'flex-col items-center gap-2 bg-white/90 backdrop-blur-md p-2 rounded-full shadow-lg border border-gray-200'}`}>
+                
+                <div className={`flex ${isExpanded ? 'flex-row w-full' : 'flex-col gap-2 items-center'}`}>
+                    {[ { id: 'widgets', name: 'العناصر', icon: 'Grid' }, { id: 'pages', name: 'الصفحات', icon: 'FileText' } ].map(tab => (
+                        <button key={tab.id} onClick={() => { setActiveTab(tab.id); if (!isExpanded) setIsExpanded(true); }} title={tab.name} className={`flex flex-col items-center justify-center transition-all duration-300 ${isExpanded ? 'flex-1 py-3 gap-1.5' : 'w-10 h-10 rounded-full hover:scale-110'} ${activeTab === tab.id ? (isExpanded ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' : 'text-blue-600 bg-blue-50') : 'text-gray-500 hover:text-blue-500'}`}>
+                            <Icon name={tab.icon} size={18} className="shrink-0" />
+                            {isExpanded && <span className="text-[11px] font-bold whitespace-nowrap">{tab.name}</span>}
+                        </button>
+                    ))}
+                </div>
 
-            <div className={`flex transition-all duration-500 ${isExpanded ? 'flex-row border-b border-gray-200 w-full px-2 pt-2' : 'flex-col gap-3 items-center justify-center w-full pt-4'}`}>
-                {[ { id: 'widgets', name: 'العناصر', icon: 'Grid' }, { id: 'pages', name: 'الصفحات', icon: 'FileText' }, { id: 'header', name: 'الترويسة', icon: 'Header' }, { id: 'theme', name: 'الثيم', icon: 'Palette' } ].map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => { setActiveTab(tab.id); if (!isExpanded) setIsExpanded(true); }}
-                        title={tab.name}
-                        className={`flex flex-col items-center justify-center transition-all duration-300 ${
-                            isExpanded ? 'flex-1 py-3 gap-1.5' : 'w-11 h-11 rounded-xl shrink-0'
-                        } ${
-                            activeTab === tab.id
-                                ? (isExpanded ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' : 'text-blue-600 bg-blue-100 shadow-sm')
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                        <Icon name={tab.icon} size={isExpanded ? 18 : 22} className="shrink-0" />
-                        <span className={`text-[11px] font-bold whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100 max-h-4' : 'opacity-0 max-h-0 overflow-hidden'}`}>{tab.name}</span>
-                    </button>
-                ))}
+                <button onClick={() => setIsExpanded(!isExpanded)} className={`z-50 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all duration-500 hover:scale-110 pointer-events-auto ${isExpanded ? 'absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2 bg-white border border-gray-200 shadow-lg rounded-full w-9 h-9' : 'w-8 h-8 bg-gray-100 rounded-full my-1'}`} title={isExpanded ? "طي القائمة" : "فرد القائمة"}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-500 ${!isExpanded ? 'rotate-180' : ''}`}><polyline points="15 18 9 12 15 6" /></svg>
+                </button>
+
+                <div className={`flex ${isExpanded ? 'flex-row w-full' : 'flex-col gap-2 items-center'}`}>
+                    {[ { id: 'header', name: 'الترويسة', icon: 'Header' }, { id: 'theme', name: 'الثيم', icon: 'Palette' } ].map(tab => (
+                        <button key={tab.id} onClick={() => { setActiveTab(tab.id); if (!isExpanded) setIsExpanded(true); }} title={tab.name} className={`flex flex-col items-center justify-center transition-all duration-300 ${isExpanded ? 'flex-1 py-3 gap-1.5' : 'w-10 h-10 rounded-full hover:scale-110'} ${activeTab === tab.id ? (isExpanded ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' : 'text-blue-600 bg-blue-50') : 'text-gray-500 hover:text-blue-500'}`}>
+                            <Icon name={tab.icon} size={18} className="shrink-0" />
+                            {isExpanded && <span className="text-[11px] font-bold whitespace-nowrap">{tab.name}</span>}
+                        </button>
+                    ))}
+                </div>
             </div>
-            
-            <div className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin transition-opacity duration-300 ${isExpanded ? 'opacity-100 delay-150 p-4 w-80' : 'opacity-0 pointer-events-none absolute invisible w-0 h-0'}`}>
+
+            <div className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin transition-opacity duration-300 pointer-events-auto ${isExpanded ? 'opacity-100 delay-150 p-4 w-80 bg-white/50' : 'opacity-0 absolute invisible w-0 h-0'}`}>
                 {activeTab === 'widgets' && (
                     <div className="space-y-2">
                         <p className="text-xs text-gray-500 mb-3 px-1">اسحب العناصر إلى منطقة العمل</p>
                         {widgetTypes.map(widget => (
-                            <div key={widget.id} draggable onDragStart={(e) => handleDragStart(e, widget.id)} onDragEnd={handleDragEnd} className="widget-item flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 cursor-grab shadow-soft">
+                            <div key={widget.id} draggable onDragStart={(e) => handleDragStart(e, widget.id)} onDragEnd={handleDragEnd} className="widget-item flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 cursor-grab shadow-soft hover:shadow-md">
                                 <div className="p-2.5 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600"><Icon name={widget.icon} size={20} /></div>
-                                <div className="flex-1"><span className="text-sm font-semibold text-gray-800">{widget.name}</span><p className="text-xs text-gray-500">{widget.description}</p></div>
+                                <div className="flex-1"><span className="text-sm font-semibold text-gray-800">{widget.name}</span><p className="text-[10px] text-gray-500">{widget.description}</p></div>
                             </div>
                         ))}
                     </div>
@@ -755,12 +775,8 @@ const { state, dispatch } = useContext(AppContext);
 const [draggedItemId, setDraggedItemId] = useState(null);
 const fileInputRef = useRef(null);
 const activePage = state.pages.find(p => p.id === state.activePage);
-const handleUpdateLive = (payload) => {
-dispatch({ type: 'UPDATE_HEADER', payload });
-};
-const saveHistory = () => {
-dispatch({ type: 'SAVE_HISTORY' });
-};
+const handleUpdateLive = (payload) => { dispatch({ type: 'UPDATE_HEADER', payload }); };
+const saveHistory = () => { dispatch({ type: 'SAVE_HISTORY' }); };
 const handleLogoUpload = async (e) => {
 const file = e.target.files;
 if (file) {
@@ -835,12 +851,6 @@ return (
 </div>
 <input type="text" value={state.headerSettings.logo} onChange={(e) => handleUpdateLive({ logo: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1 rounded-lg text-sm" placeholder="النص البديل للشعار" />
 <SliderWithIdeal label="حجم الشعار" value={state.headerSettings.logoSize} min={20} max={120} ideal={40} onChange={(e) => handleUpdateLive({ logoSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-<select value={state.headerSettings.logoShape} onChange={(e) => { handleUpdateLive({ logoShape: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1 rounded-lg text-[10px]">
-<option value="default">الشكل الافتراضي</option>
-<option value="circle">دائري</option>
-<option value="rounded">منحني الأطراف</option>
-<option value="triangle">مثلث</option>
-</select>
 </div>
 </div>
 <div className="p-3 rounded-xl bg-white border border-gray-200 shadow-soft">
@@ -1022,7 +1032,7 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
                 <h1
                     data-placeholder="عنوان البانر الرئيسي"
                     contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })}
-                    className="font-bold max-w-4xl font-display leading-tight"
+                    className="font-bold max-w-4xl font-display leading-tight outline-none"
                     style={{ color: textColor, fontSize: `${titleSize}px`, marginBottom: `${titleGutter}px` }}
                 >
                     {title !== undefined ? title : 'اكتشف أفضل المنتجات'}
@@ -1030,14 +1040,14 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
                 <p
                     data-placeholder="أضف وصفاً جذاباً لمنتجك أو خدمتك هنا..."
                     contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { subtitle: e.target.innerText })}
-                    className="max-w-2xl leading-relaxed"
+                    className="max-w-2xl leading-relaxed outline-none"
                     style={{ color: textColor, fontSize: `${subtitleSize}px`, marginBottom: `${subtitleGutter}px` }}
                 >
                     {subtitle !== undefined ? subtitle : 'تسوق الآن واحصل على خصم 30% على طلبك الأول'}
                 </p>
                 {showButton !== false && (
                     <button 
-                        className="rounded-xl font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center" 
+                        className="rounded-xl font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center outline-none" 
                         style={{ 
                             backgroundColor: btnColor, 
                             color: btnTextColor, 
@@ -1056,84 +1066,83 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
     );
 };
 
-// ==================== PRODUCTS SECTION COMPONENT ====================
+// ==================== PRODUCTS SECTION (محدث) ====================
 const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
-    const { 
-        title, cardStyle = 'style1', showAddToCart = true, showRating = true, columns, columnsTablet, columnsMobile
-    } = section.props || {};
-
-    const getColumns = () => { 
-        if (viewport === 'mobile') return columnsMobile || 2; 
-        if (viewport === 'tablet') return columnsTablet || 3; 
-        return columns || 4; 
-    };
+    const { title, cardStyle = 'style1', showAddToCart = true, showRating = true, columns, columnsTablet, columnsMobile, listType, subCategory, activeFilters = [] } = section.props || {};
+    const getColumns = () => { if (viewport === 'mobile') return columnsMobile || 2; if (viewport === 'tablet') return columnsTablet || 3; return columns || 4; };
 
     const allProducts = [
-        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين مميز للغاية', price: '60.00', oldPrice: '75.00', category: 'ملابس', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
-        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف مرن ومقاوم للصدمات', price: '45.00', oldPrice: null, category: 'أحذية', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
-        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة ومقاومة للماء سير جلد', price: '50.00', oldPrice: '60.00', category: 'ساعات', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
-        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري راقي جداً', price: '50.00', oldPrice: '60.00', category: 'ملابس', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
+        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين مميز للغاية', price: '60.00', oldPrice: '75.00', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
+        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف مرن ومقاوم للصدمات', price: '45.00', oldPrice: null, company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
+        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة ومقاومة للماء سير جلد', price: '50.00', oldPrice: '60.00', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
+        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري راقي جداً', price: '50.00', oldPrice: '60.00', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
     ];
 
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-2.5 md:p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className="max-w-7xl mx-auto py-2">
                 <div className="flex flex-col items-center mb-5">
-                    <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم المنتجات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-xl md:text-3xl font-bold font-display text-gray-800 mb-2 text-center">
+                    <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم المنتجات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-xl md:text-3xl font-bold font-display text-gray-800 mb-2 text-center outline-none">
                         {title !== undefined ? title : 'منتجاتنا المميزة'}
                     </h3>
                 </div>
+
+                {/* واجهة الفلاتر الديناميكية */}
+                {listType === 'dynamic' && (
+                    <div className="flex flex-wrap justify-center gap-3 mb-8 items-center bg-gray-50/50 p-3 rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors">
+                            <Icon name="Folder" size={14} className="text-blue-600" />
+                            <select className="bg-transparent text-sm font-bold text-gray-700 outline-none pr-2 cursor-pointer appearance-none">
+                                <option value="">{subCategory || 'كل الأقسام'}</option>
+                                <option value="1">تصفية تلقائية 1</option>
+                            </select>
+                            <Icon name="ChevronDown" size={12} className="text-gray-400" />
+                        </div>
+                        
+                        {activeFilters.map(filter => (
+                            <div key={filter} className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors">
+                                <span className="text-xs text-gray-500">{filter}:</span>
+                                <select className="bg-transparent text-xs font-bold text-gray-800 outline-none cursor-pointer appearance-none pr-1">
+                                    <option value="">الكل</option>
+                                    <option value="val1">تصفية تلقائية</option>
+                                </select>
+                                <Icon name="ChevronDown" size={12} className="text-gray-400 ml-1" />
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <div className="grid gap-2.5 md:gap-6" style={{ gridTemplateColumns: `repeat(${getColumns()}, minmax(0, 1fr))` }}>
                     {allProducts.map(product => {
                         const hasDiscount = product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price);
                         const discountPercent = hasDiscount ? Math.round(((parseFloat(product.oldPrice) - parseFloat(product.price)) / parseFloat(product.oldPrice)) * 100) : 0;
-
                         return (
                             <div key={product.id} className="product-card group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-soft flex flex-col h-full relative transition-all duration-300">
-                                
-                                {hasDiscount && (
-                                    <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] md:text-[11px] font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-sm select-none">
-                                        {discountPercent}%-
-                                    </div>
-                                )}
-
+                                {hasDiscount && <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] md:text-[11px] font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-sm select-none">{discountPercent}%-</div>}
                                 {cardStyle === 'style2' && (
                                     <div className="flex items-center justify-between p-2 md:p-2.5 border-b border-gray-50 bg-gray-50/50">
                                         <span className="font-bold text-blue-700 text-[10px] md:text-xs truncate max-w-[70%]">{product.company}</span>
                                         <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white flex items-center justify-center shadow-sm text-[10px] md:text-xs border border-gray-100 shrink-0">{product.logo}</div>
                                     </div>
                                 )}
-
-                                <div className="w-full aspect-square p-2.5 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
-                                    <img src={product.image} alt={product.name} className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" />
+                                <div className="w-full aspect-[4/5] p-2 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
+                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-2xl transition-transform duration-500 group-hover:scale-105" />
                                 </div>
-                                
                                 <div className="p-2.5 md:p-4 flex flex-col flex-1 text-right md:text-center bg-white">
-                                    <h4 className="text-gray-700 font-semibold mb-1 text-[11px] md:text-sm leading-tight line-clamp-2 h-7 md:h-10 text-right md:text-center">{product.name}</h4>
-                                    
+                                    <h4 className="text-gray-700 font-semibold mb-1 text-[11px] md:text-sm leading-tight line-clamp-2 h-7 md:h-10">{product.name}</h4>
                                     <div className="mt-auto">
                                         {showRating !== false && (
                                             <div className="flex gap-0.5 mb-1.5 justify-start md:justify-center">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Icon key={i} name="Star" size={10} className={i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"} />
-                                                ))}
+                                                {[...Array(5)].map((_, i) => <Icon key={i} name="Star" size={10} className={i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"} />)}
                                             </div>
                                         )}
-                                        
                                         <div className="flex items-center justify-start md:justify-center gap-1.5 mb-2.5" dir="rtl">
-                                            <span className="font-extrabold text-xs md:text-base text-gray-900">
-                                                {product.price} <span className="text-[9px] md:text-xs font-normal text-gray-500">ر.س</span>
-                                            </span>
-                                            {hasDiscount && (
-                                                <span className="text-[10px] md:text-xs text-gray-400 line-through decoration-gray-400">{product.oldPrice} ر.س</span>
-                                            )}
+                                            <span className="font-extrabold text-xs md:text-base text-gray-900">{product.price} <span className="text-[9px] md:text-xs font-normal text-gray-500">ر.س</span></span>
+                                            {hasDiscount && <span className="text-[10px] md:text-xs text-gray-400 line-through decoration-gray-400">{product.oldPrice} ر.س</span>}
                                         </div>
-
                                         {showAddToCart !== false && (
-                                            <button className="w-full py-1.5 md:py-2 rounded-2xl text-[10px] md:text-xs font-bold text-[#1e293b] bg-orange-100 hover:bg-orange-200/80 transition-all duration-200 flex items-center justify-center gap-1 border border-orange-200/40 shadow-sm active:scale-95">
-                                                <Icon name="ShoppingCart" size={12} className="text-[#1e293b]" />
-                                                إضافة للسلة
+                                            <button className="w-full py-1.5 md:py-2 rounded-2xl text-[10px] md:text-xs font-bold text-white transition-all duration-200 flex items-center justify-center gap-1 shadow-sm hover:opacity-90 active:scale-95" style={{ backgroundColor: 'var(--accent)' }}>
+                                                <Icon name="ShoppingCart" size={12} /> إضافة للسلة
                                             </button>
                                         )}
                                     </div>
@@ -1147,31 +1156,34 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
     );
 };
 
-// ==================== CATEGORIES, BANNER, FEATURES, NEWSLETTER, FOOTER SECTIONS ====================
+// ==================== CATEGORIES SECTION (محدث) ====================
 const CategoriesSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
-    const { title = 'تصفح الفئات', columns = 4, overlayOpacity = 40, overlayColor = '#000000', contentAlign = 'center', contentPosition = 'bottom', showCardButton = false, cardButtonBg = '#ffffff', cardButtonText = '#1e293b', categories = [
-        { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' },
-        { id: 'c2', name: 'أزياء', subtitle: '243 منتج', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' },
-        { id: 'c3', name: 'أجهزة منزلية', subtitle: '89 منتج', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80' },
-        { id: 'c4', name: 'رياضة', subtitle: '67 منتج', image: 'https://images.unsplash.com/photo-1461896836934-1543358e6d74?w=400&q=80' }
+    const { title = 'تصفح الفئات', columns = 4, columnsTablet = 3, columnsMobile = 2, overlayOpacity = 40, overlayColor = '#000000', contentAlign = 'center', contentPosition = 'bottom', showCardButton = false, cardButtonBg = '#3b82f6', cardButtonText = '#ffffff', btnSize = 12, categories = [
+        { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80', btnText: 'تصفح' },
+        { id: 'c2', name: 'أزياء', subtitle: '243 منتج', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80', btnText: 'تصفح' }
     ] } = section.props || {};
-    const getCols = () => viewport === 'mobile' ? (section.props.columnsMobile || 2) : viewport === 'tablet' ? (section.props.columnsTablet || 3) : (columns || 4);
+    
+    const getCols = () => viewport === 'mobile' ? columnsMobile : viewport === 'tablet' ? columnsTablet : columns;
     const alignClasses = { right: 'items-start text-right', center: 'items-center text-center', left: 'items-end text-left' };
     const positionClasses = { top: 'justify-start pt-6 pb-4', center: 'justify-center py-4', bottom: 'justify-end pt-4 pb-6' };
 
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className="max-w-7xl mx-auto py-8">
-                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم الفئات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold font-display text-gray-800 mb-8 text-center">{title}</h3>
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان قسم الفئات" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold font-display text-gray-800 mb-8 text-center outline-none">{title}</h3>
                 <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: `repeat(${getCols()}, minmax(0, 1fr))` }}>
                     {categories.map((cat, i) => (
                         <div key={cat.id || i} className="relative group overflow-hidden rounded-2xl aspect-[4/5] md:aspect-[4/3] shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
                             <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                             <div className="absolute inset-0 transition-opacity duration-300" style={{ backgroundColor: overlayColor, opacity: overlayOpacity / 100 }}></div>
                             <div className={`absolute inset-0 p-5 flex flex-col z-10 ${positionClasses[contentPosition]} ${alignClasses[contentAlign]}`}>
-                                <h4 className="font-bold text-white text-xl drop-shadow-md leading-tight mb-1">{cat.name}</h4>
-                                {cat.subtitle && <p className="text-white/90 text-sm font-medium drop-shadow-md">{cat.subtitle}</p>}
-                                {showCardButton && <button className="mt-4 px-5 py-2 rounded-xl text-xs font-bold transition-transform hover:-translate-y-1 shadow-lg" style={{ backgroundColor: cardButtonBg, color: cardButtonText }}>{cat.buttonText || 'تصفح'}</button>}
+                                <h4 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => { const nc = [...categories]; nc[i].name = e.target.innerText; onUpdate && onUpdate(section.id, { categories: nc }); }} className="font-bold text-white text-xl drop-shadow-md leading-tight mb-1 outline-none">{cat.name}</h4>
+                                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => { const nc = [...categories]; nc[i].subtitle = e.target.innerText; onUpdate && onUpdate(section.id, { categories: nc }); }} className="text-white/90 text-sm font-medium drop-shadow-md outline-none">{cat.subtitle}</p>
+                                {showCardButton && (
+                                    <button className="mt-4 px-5 py-2 rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg border border-white/20" style={{ backgroundColor: cardButtonBg, color: cardButtonText, fontSize: `${btnSize}px` }}>
+                                        <span contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => { const nc = [...categories]; nc[i].btnText = e.target.innerText; onUpdate && onUpdate(section.id, { categories: nc }); }} className="outline-none">{cat.btnText || 'تصفح'}</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -1181,8 +1193,9 @@ const CategoriesSection = ({ section, isSelected, onSelect, onUpdate, viewport }
     );
 };
 
+// ==================== BANNER SECTION (محدث) ====================
 const BannerSection = ({ section, isSelected, onSelect, onUpdate }) => {
-    const { title, description, bgColor = '#3b82f6', bgImage, overlayOpacity = 40, bannerHeight = 'md', textColor = '#ffffff', titleSize = 32, showButton = true, buttonText, btnColor = '#ffffff', btnTextColor = '#1e293b', contentAlign = 'center', contentPosition = 'center', showText = true, images = [] } = section.props || {};
+    const { title, description, bgColor = '#3b82f6', bgImage, overlayOpacity = 40, bannerHeight = 'md', textColor = '#ffffff', titleSize = 32, showButton = true, buttonText, btnColor = '#ffffff', btnTextColor = '#1e293b', btnSize = 16, contentAlign = 'center', contentPosition = 'center', showText = true, floatingImages = [] } = section.props || {};
     const heightClasses = { sm: 'min-h-[200px]', md: 'min-h-[350px]', lg: 'min-h-[500px]' };
     const alignClasses = { right: 'text-right items-start', center: 'text-center items-center', left: 'text-left items-end' };
     const justifyClasses = { top: 'justify-start', center: 'justify-center', bottom: 'justify-end' };
@@ -1192,52 +1205,51 @@ const BannerSection = ({ section, isSelected, onSelect, onUpdate }) => {
             <div className={`relative rounded-3xl overflow-hidden shadow-medium w-full flex flex-col transition-all duration-300 ${heightClasses[bannerHeight]}`} style={{ backgroundColor: bgColor }}>
                 {bgImage && <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: `url(${bgImage})` }}></div>}
                 <div className="absolute inset-0 bg-black pointer-events-none transition-opacity" style={{ opacity: overlayOpacity / 100 }}></div>
+                
+                {floatingImages.map((img, i) => (
+                    <img key={i} src={img.url} alt="Promo" className="absolute object-cover shadow-xl border border-white/20 transition-transform duration-500 hover:scale-110 hover:-rotate-3" style={{ width: `${img.size}px`, height: `${img.size}px`, top: `${img.y}%`, left: `${img.x}%`, borderRadius: img.rounded ? '50%' : '16px', zIndex: 5 }} />
+                ))}
+
                 <div className={`relative z-10 w-full h-full flex flex-col gap-8 p-8 md:p-12 ${justifyClasses[contentPosition]}`}>
                     <div className={`flex flex-col flex-1 ${alignClasses[contentAlign]} justify-center`}>
                         {showText !== false && (
                             <>
-                                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display leading-tight drop-shadow-md" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title !== undefined ? title : 'عرض خاص'}</h3>
-                                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="وصف البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { description: e.target.innerText })} className="mb-6 max-w-xl text-lg drop-shadow-sm" style={{ color: textColor, opacity: 0.9 }}>{description !== undefined ? description : 'احصل على خصم 50% على جميع المنتجات'}</p>
+                                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display leading-tight drop-shadow-md outline-none" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title !== undefined ? title : 'عرض خاص'}</h3>
+                                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="وصف البانر" onBlur={(e) => onUpdate && onUpdate(section.id, { description: e.target.innerText })} className="mb-6 max-w-xl text-lg drop-shadow-sm outline-none" style={{ color: textColor, opacity: 0.9 }}>{description !== undefined ? description : 'احصل على خصم 50% على جميع المنتجات'}</p>
                             </>
                         )}
                         {showButton !== false && (
-                            <button className="px-8 py-3.5 rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg border border-white/20 hover:shadow-xl" style={{ backgroundColor: btnColor, color: btnTextColor }}>
+                            <button className="px-8 py-3.5 rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg border border-white/20 hover:shadow-xl" style={{ backgroundColor: btnColor, color: btnTextColor, fontSize: `${btnSize}px` }}>
                                 <span data-placeholder="نص الزر" contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => onUpdate && onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText || 'تسوق الآن'}</span>
                             </button>
                         )}
                     </div>
-                    {images && images.length > 0 && (
-                        <div className={`flex flex-wrap items-center gap-4 flex-1 ${alignClasses[contentAlign]} ${contentAlign === 'center' ? 'justify-center' : ''}`}>
-                            {images.map((img, i) => (
-                                <img key={i} src={img} alt="Promo" className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl border-2 border-white/20 hover:scale-110 hover:-rotate-2 transition-transform duration-300" />
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
     );
 };
 
+// ==================== FEATURES SECTION (محدث) ====================
 const FeaturesSection = ({ section, isSelected, onSelect, onUpdate }) => {
-    const { title = 'لماذا نحن؟', features = [
+    const { title = 'لماذا نحن؟', boxBg = '#ffffff', boxSize = 'md', iconColor, features = [
         { id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات المضمونة' },
-        { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' },
-        { id: 'f3', icon: 'Shield', title: 'دفع آمن', desc: 'حماية كاملة لبياناتك' }
+        { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }
     ] } = section.props || {};
-    
+    const sizeClasses = { sm: 'p-4', md: 'p-6', lg: 'p-8' };
+
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
             <div className="max-w-6xl mx-auto">
-                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان القسم" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl font-bold mb-10 font-display text-center text-gray-800">{title}</h3>
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان القسم" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl font-bold mb-10 font-display text-center text-gray-800 outline-none">{title}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {features.map((f) => (
-                        <div key={f.id} className="text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-soft hover:shadow-medium transition-all group">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 transition-transform group-hover:scale-110">
-                                <Icon name={f.icon || 'Star'} size={26} />
+                    {features.map((f, idx) => (
+                        <div key={f.id || idx} className={`text-center rounded-2xl border border-gray-100 shadow-soft hover:shadow-medium transition-all group ${sizeClasses[boxSize]}`} style={{ backgroundColor: boxBg }}>
+                            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110 shadow-sm" style={{ backgroundColor: `${iconColor || 'var(--accent)'}15`, color: iconColor || 'var(--accent)' }}>
+                                <Icon name={f.icon || 'Star'} size={28} />
                             </div>
-                            <h4 className="font-bold text-gray-800 mb-2">{f.title}</h4>
-                            <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                            <h4 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => { const newF = [...features]; newF[idx].title = e.target.innerText; onUpdate && onUpdate(section.id, { features: newF }); }} className="font-bold text-gray-800 mb-2 outline-none">{f.title}</h4>
+                            <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning onBlur={(e) => { const newF = [...features]; newF[idx].desc = e.target.innerText; onUpdate && onUpdate(section.id, { features: newF }); }} className="text-sm text-gray-500 leading-relaxed outline-none">{f.desc}</p>
                         </div>
                     ))}
                 </div>
@@ -1246,51 +1258,56 @@ const FeaturesSection = ({ section, isSelected, onSelect, onUpdate }) => {
     );
 };
 
+// ==================== NEWSLETTER SECTION (محدث) ====================
 const NewsletterSection = ({ section, isSelected, onSelect, onUpdate }) => {
-    const { title = 'اشترك في نشرتنا البريدية', subtitle = 'احصل على أحدث العروض والخصومات', bgColor = '#f8fafc', textColor = '#1e293b' } = section.props || {};
+    const { title = 'اشترك في نشرتنا', subtitle = 'احصل على أحدث العروض', bgColor = '#f8fafc', textColor = '#1e293b', boxWidth = 'max-w-md', btnText = 'اشتراك', placeholderText = 'بريدك الإلكتروني...', btnSize = 14, titleSize = 28, subtitleSize = 16 } = section.props || {};
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-16 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
             <div className="max-w-2xl mx-auto text-center">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600"><Icon name="Mail" size={28} /></div>
-                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="العنوان" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold mb-3 font-display">{title}</h3>
-                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="الوصف" onBlur={(e) => onUpdate && onUpdate(section.id, { subtitle: e.target.innerText })} className="mb-8 opacity-80">{subtitle}</p>
-                <div className="flex gap-2 max-w-md mx-auto bg-white p-1.5 rounded-xl shadow-sm border border-gray-200">
-                    <input type="email" placeholder="بريدك الإلكتروني..." className="flex-1 px-4 py-2 outline-none bg-transparent text-gray-800 text-sm" disabled />
-                    <button className="px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90" style={{ backgroundColor: 'var(--accent, #3b82f6)' }}>اشتراك</button>
+                <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6 shadow-sm" style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent-dark)' }}><Icon name="Mail" size={28} /></div>
+                
+                <h3 contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="عنوان النشرة" onBlur={(e) => onUpdate && onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display outline-none" style={{ fontSize: `${titleSize}px` }}>{title}</h3>
+                <p contentEditable={onSelect ? "true" : "false"} suppressContentEditableWarning data-placeholder="الوصف" onBlur={(e) => onUpdate && onUpdate(section.id, { subtitle: e.target.innerText })} className="mb-8 opacity-80 outline-none" style={{ fontSize: `${subtitleSize}px` }}>{subtitle}</p>
+                
+                <div className={`flex gap-2 mx-auto bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 ${boxWidth}`}>
+                    <input type="email" placeholder={placeholderText} className="flex-1 px-4 py-2 outline-none bg-transparent text-gray-800 text-sm" disabled />
+                    <button className="px-6 py-2.5 rounded-lg font-bold text-white transition-all hover:opacity-90 shadow-md" style={{ backgroundColor: 'var(--accent)', fontSize: `${btnSize}px` }}>{btnText}</button>
                 </div>
             </div>
         </div>
     );
 };
 
+// ==================== FOOTER SECTION (محدث) ====================
 const FooterSection = ({ section, isSelected, onSelect }) => {
     const { state } = useContext(AppContext);
-    const { bgColor = '#1e293b', textColor = '#f8fafc' } = section.props || {};
+    const { bgColor = 'var(--accent-dark)', textColor = '#ffffff', columns = [
+        { id: 'col1', title: 'روابط هامة', links: ['الرئيسية', 'المنتجات', 'من نحن'] },
+        { id: 'col2', title: 'سياسة المتجر', links: ['الشروط والأحكام', 'سياسة الاسترجاع'] }
+    ] } = section.props || {};
 
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-10 mb-10 justify-between">
-                    <div className="flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+                    <div className="md:col-span-2">
                         {state.headerSettings.logoImage ? <img src={state.headerSettings.logoImage} alt="Logo" className="h-10 mb-4 brightness-0 invert" /> : <h4 className="font-bold text-xl mb-4 font-display">{state.headerSettings.logo}</h4>}
-                        <p className="text-sm leading-relaxed opacity-80">وجهتك الأولى للتسوق الإلكتروني بأفضل الأسعار وأعلى جودة.</p>
+                        <p className="text-sm leading-relaxed opacity-80 max-w-sm">وجهتك الأولى للتسوق الإلكتروني بأفضل الأسعار وأعلى جودة.</p>
                     </div>
-                    <div className="flex gap-10">
-                         <div>
-                            <h4 className="font-bold text-lg mb-4">روابط هامة</h4>
+                    {columns.map(col => (
+                        <div key={col.id}>
+                            <h4 className="font-bold text-lg mb-4">{col.title}</h4>
                             <ul className="space-y-2 text-sm opacity-80">
-                                <li className="hover:opacity-100 cursor-pointer">الرئيسية</li>
-                                <li className="hover:opacity-100 cursor-pointer">المنتجات</li>
-                                <li className="hover:opacity-100 cursor-pointer">من نحن</li>
+                                {col.links.map((link, i) => <li key={i} className="hover:opacity-100 cursor-pointer">{link}</li>)}
                             </ul>
                         </div>
-                        <div>
-                            <h4 className="font-bold text-lg mb-4">تواصل معنا</h4>
-                            <div className="flex gap-3 items-center">
-                                {state.headerSettings.socialLinks.filter(l => l.visible && l.url).map(link => (
-                                    <a key={link.id} href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all text-white"><Icon name={link.icon} size={14} /></a>
-                                ))}
-                            </div>
+                    ))}
+                    <div>
+                        <h4 className="font-bold text-lg mb-4">تواصل معنا</h4>
+                        <div className="flex gap-3 items-center">
+                            {state.headerSettings.socialLinks.filter(l => l.visible && l.url).map(link => (
+                                <a key={link.id} href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all text-white"><Icon name={link.icon} size={14} /></a>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -1300,7 +1317,37 @@ const FooterSection = ({ section, isSelected, onSelect }) => {
     );
 };
 
-// ==================== DRAGGABLE SECTION LIST ====================
+// ==================== SPACER SECTION (محدث) ====================
+const SpacerSection = ({ section, isSelected, onSelect }) => {
+    const { top = 20, bottom = 20, left = 0, right = 0 } = section.props || {};
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} 
+             className={`w-full transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} 
+             style={{ paddingTop: `${top}px`, paddingBottom: `${bottom}px`, paddingLeft: `${left}px`, paddingRight: `${right}px` }}>
+            {isSelected && <div className="w-full h-full bg-blue-50/50 border border-blue-200/50 flex items-center justify-center text-[10px] font-bold text-blue-500 rounded-lg min-h-[20px]">مساحة فارغة ({top}px أعلى | {bottom}px أسفل)</div>}
+        </div>
+    );
+};
+
+// ==================== TEXT SECTION (محدث) ====================
+const TextSection = ({ section, isSelected, onSelect, onUpdate }) => {
+    const { text = 'انقر نقراً مزدوجاً لتحرير هذا النص، استخدم شريط الأدوات العائم لتغيير الخط واللون.', padding = 20 } = section.props || {};
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} 
+             className={`w-full transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} 
+             style={{ padding: `${padding}px` }}>
+            <div 
+                contentEditable={onSelect ? "true" : "false"} 
+                suppressContentEditableWarning 
+                onBlur={(e) => onUpdate && onUpdate(section.id, { text: e.target.innerHTML })} 
+                dangerouslySetInnerHTML={{ __html: text }} 
+                className="outline-none max-w-7xl mx-auto leading-relaxed" 
+            />
+        </div>
+    );
+};
+
+// ==================== SECTION LIST & RENDER ====================
 const SectionList = ({ sections, selectedSection, onSelect, onUpdate, onReorder, viewport }) => {
     const [draggedId, setDraggedId] = useState(null);
     const [dragOverId, setDragOverId] = useState(null);
@@ -1378,53 +1425,50 @@ case 'banner': return <BannerSection {...props} />;
 case 'features': return <FeaturesSection {...props} />;
 case 'newsletter': return <NewsletterSection {...props} />;
 case 'footer': return <FooterSection {...props} />;
+case 'spacer': return <SpacerSection {...props} />;
+case 'text': return <TextSection {...props} />;
 default: return <div onClick={(e) => { e.stopPropagation(); onSelect && onSelect(section.id); }} className={`p-6 bg-white ${isSelected ? 'section-selected' : ''}`}><h3 className="text-xl font-bold">{section.type}</h3></div>;
 }
 };
 
-// ==================== SETTINGS PANEL COMPONENT ====================
+// ==================== SETTINGS PANEL COMPONENT (محدث بالكامل) ====================
 const SettingsPanel = ({ viewport }) => {
-const { state, dispatch } = useContext(AppContext);
-const { addToast } = useContext(ToastContext);
+    const { state, dispatch } = useContext(AppContext);
+    const { addToast } = useContext(ToastContext);
 
-const activePage = state.pages.find(p => p.id === state.activePage);
-const selectedSection = activePage?.sections.find(s => s.id === state.selectedSection);
+    const activePage = state.pages.find(p => p.id === state.activePage);
+    const selectedSection = activePage?.sections.find(s => s.id === state.selectedSection);
 
-if (!selectedSection) return null;
+    if (!selectedSection) return null;
 
-const handleUpdateLive = (props) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props } }); };
-const saveHistory = () => dispatch({ type: 'SAVE_HISTORY' });
-const handleUpdate = (props) => { handleUpdateLive(props); saveHistory(); };
+    const handleUpdateLive = (props) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props } }); };
+    const saveHistory = () => dispatch({ type: 'SAVE_HISTORY' });
+    const handleUpdate = (props) => { handleUpdateLive(props); saveHistory(); };
 
-const handleDelete = () => {
-    if(window.confirm('هل أنت متأكد من حذف هذا القسم نهائياً؟')) {
-        dispatch({ type: 'DELETE_SECTION', payload: selectedSection.id });
-        dispatch({ type: 'SAVE_HISTORY' });
-        addToast('تم حذف القسم', 'success');
-    }
-};
+    const handleDelete = () => {
+        if(window.confirm('هل أنت متأكد من حذف هذا القسم نهائياً؟')) {
+            dispatch({ type: 'DELETE_SECTION', payload: selectedSection.id });
+            dispatch({ type: 'SAVE_HISTORY' });
+            addToast('تم حذف القسم', 'success');
+        }
+    };
 
-const renderSettings = () => {
-switch (selectedSection.type) {
-case 'hero':
+    const renderSettings = () => {
+        switch (selectedSection.type) {
+            case 'hero':
                 const heroProps = selectedSection.props;
                 const handleHeroUpload = async (e) => {
                     const files = Array.from(e.target.files);
                     if (files.length > 0) {
                         const newUrls = await Promise.all(files.map(f => fileToBase64(f)));
-                        const currentUrls = heroProps.mediaUrls || [];
-                        handleUpdate({
-                            mediaUrls: heroProps.mediaType === 'slider' ? [...currentUrls, ...newUrls] : [newUrls]
-                        });
+                        handleUpdate({ mediaUrls: heroProps.mediaType === 'slider' ? [...(heroProps.mediaUrls || []), ...newUrls] : newUrls });
                     }
                     e.target.value = '';
                 };
                 return (
                     <div className="space-y-4 pb-4">
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="flex items-center justify-between border-b pb-1 mb-2">
-                                <h5 className="text-[11px] font-bold text-gray-700">الخلفية والأبعاد</h5>
-                            </div>
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الخلفية والأبعاد</h5>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="text-[10px] text-gray-500 mb-1 block">ارتفاع البانر</label>
@@ -1437,7 +1481,7 @@ case 'hero':
                                 </div>
                                 <div>
                                     <label className="text-[10px] text-gray-500 mb-1 block">نوع الخلفية</label>
-                                    <select value={heroProps.mediaType || 'image'} onChange={(e) => handleUpdate({ mediaType: e.target.value, mediaUrls: [] })} className="input-field w-full px-2 py-1.5 rounded-lg text-xs">
+                                    <select value={heroProps.mediaType || 'image'} onChange={(e) => handleUpdate({ mediaType: e.target.value })} className="input-field w-full px-2 py-1.5 rounded-lg text-xs">
                                         <option value="image">صورة ثابتة</option>
                                         <option value="video">فيديو</option>
                                         <option value="slider">صور متعددة</option>
@@ -1445,73 +1489,30 @@ case 'hero':
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[10px] text-gray-500 mb-1 block">الرابط المباشر للوسائط</label>
+                                <label className="text-[10px] text-gray-500 mb-1 block">رابط الوسائط</label>
                                 <div className="flex gap-1">
                                     <input type="text" value={heroProps.mediaUrls?.join(', ') || ''} onChange={(e) => handleUpdateLive({ mediaUrls: e.target.value.split(',').map(s=>s.trim()) })} onBlur={saveHistory} className="input-field flex-1 px-2 py-1.5 rounded-lg text-[10px]" placeholder="https://..." />
-                                    <button type="button" onClick={() => document.getElementById('hero-upload').click()} className="px-2 bg-white border border-gray-200 rounded-lg text-blue-600 hover:bg-blue-50 shrink-0">
-                                        <Icon name="Upload" size={14} />
-                                    </button>
-                                    <input id="hero-upload" type="file" multiple={heroProps.mediaType === 'slider'} accept={heroProps.mediaType === 'video' ? 'video/mp4' : 'image/*'} onChange={handleHeroUpload} className="hidden" />
+                                    <button onClick={() => document.getElementById('hero-up').click()} className="px-2 bg-white border rounded-lg text-blue-600 hover:bg-blue-50"><Icon name="Upload" size={14} /></button>
+                                    <input id="hero-up" type="file" multiple={heroProps.mediaType === 'slider'} accept="image/*,video/mp4" onChange={handleHeroUpload} className="hidden" />
                                 </div>
                             </div>
-                            <div>
-                                <div className="flex items-center justify-between"><label className="text-[10px] text-gray-500">طبقة التظليل</label><span className="text-[10px] text-blue-600">{heroProps.overlay || 40}%</span></div>
-                                <input type="range" min="0" max="90" value={heroProps.overlay || 40} onChange={(e) => handleUpdateLive({ overlay: parseInt(e.target.value) })} onMouseUp={saveHistory} onTouchEnd={saveHistory} className="w-full h-1.5 rounded-lg appearance-none slider-track mt-1" />
-                            </div>
+                            <SliderWithIdeal label="التظليل" value={heroProps.overlay || 40} min={0} max={90} ideal={40} onChange={(e) => handleUpdateLive({ overlay: parseInt(e.target.value) })} onDragEnd={saveHistory} />
                         </div>
-
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">التحكم الحر في النصوص والمواقع</h5>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                                <div>
-                                    <label className="text-[10px] text-gray-500 mb-1 block">محاذاة النص أفقياً</label>
-                                    <select value={heroProps.contentAlign || 'center'} onChange={(e) => { handleUpdateLive({ contentAlign: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
-                                        <option value="right">يمين</option>
-                                        <option value="center">وسط</option>
-                                        <option value="left">يسار</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] text-gray-500 mb-1 block">موقع المحتوى رأسياً</label>
-                                    <select value={heroProps.contentPosition || 'center'} onChange={(e) => { handleUpdateLive({ contentPosition: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
-                                        <option value="top">أعلى</option>
-                                        <option value="center">منتصف</option>
-                                        <option value="bottom">أسفل</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="pt-2">
-                                <SliderWithIdeal label="حجم العنوان الرئيسي" value={heroProps.titleSize || 48} min={20} max={80} ideal={48} onChange={(e) => handleUpdateLive({ titleSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                <SliderWithIdeal label="حجم النص الوصفي" value={heroProps.subtitleSize || 18} min={12} max={36} ideal={18} onChange={(e) => handleUpdateLive({ subtitleSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                <SliderWithIdeal label="المسافة أسفل العنوان" value={heroProps.titleGutter || 16} min={0} max={60} ideal={16} onChange={(e) => handleUpdateLive({ titleGutter: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                <SliderWithIdeal label="المسافة أسفل الوصف" value={heroProps.subtitleGutter || 32} min={0} max={80} ideal={32} onChange={(e) => handleUpdateLive({ subtitleGutter: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                            </div>
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">النصوص والزر</h5>
+                            <SliderWithIdeal label="حجم العنوان" value={heroProps.titleSize || 48} min={20} max={80} ideal={48} onChange={(e) => handleUpdateLive({ titleSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
                             <ColorPickerWithDropper label="لون النصوص" value={heroProps.textColor || '#ffffff'} onChange={(val) => handleUpdateLive({ textColor: val })} onBlur={saveHistory} />
-                        </div>
-
-                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="flex items-center justify-between border-b pb-1 mb-2">
-                                <h5 className="text-[11px] font-bold text-gray-700">الزر (CTA)</h5>
-                                <button onClick={() => handleUpdate({ showButton: heroProps.showButton === false ? true : false })} className={`toggle-switch w-8 h-4 rounded-full relative ${heroProps.showButton !== false ? 'active' : 'bg-gray-200'}`}>
-                                    <span className="toggle-dot absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-white shadow"></span>
-                                </button>
-                            </div>
+                            
+                            <button onClick={() => handleUpdate({ showButton: heroProps.showButton === false ? true : false })} className={`toggle-switch w-8 h-4 rounded-full relative mb-2 ${heroProps.showButton !== false ? 'active' : 'bg-gray-200'}`}>
+                                <span className="toggle-dot absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-white shadow"></span>
+                            </button>
                             {heroProps.showButton !== false && (
                                 <>
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 mb-1 block">نص الزر</label>
-                                        <input type="text" value={heroProps.buttonText || 'تسوق الآن'} onChange={(e) => handleUpdateLive({ buttonText: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <ColorPickerWithDropper label="لون خلفية الزر" value={heroProps.btnColor || '#ffffff'} onChange={(val) => handleUpdateLive({ btnColor: val })} onBlur={saveHistory} />
-                                        <ColorPickerWithDropper label="لون نص الزر" value={heroProps.btnTextColor || '#1e293b'} onChange={(val) => handleUpdateLive({ btnTextColor: val })} onBlur={saveHistory} />
-                                    </div>
-                                    <div className="pt-1">
-                                        <SliderWithIdeal label="حجم نص الزر" value={heroProps.btnFontSize || 16} min={12} max={28} ideal={16} onChange={(e) => handleUpdateLive({ btnFontSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <SliderWithIdeal label="الاتساع الأفقي" value={heroProps.btnPaddingX || 32} min={12} max={64} ideal={32} onChange={(e) => handleUpdateLive({ btnPaddingX: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                            <SliderWithIdeal label="الاتساع الرأسي" value={heroProps.btnPaddingY || 14} min={6} max={32} ideal={14} onChange={(e) => handleUpdateLive({ btnPaddingY: parseInt(e.target.value) })} onDragEnd={saveHistory} />
-                                        </div>
+                                    <input type="text" value={heroProps.buttonText || 'تسوق الآن'} onChange={(e) => handleUpdateLive({ buttonText: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs mb-2" placeholder="نص الزر" />
+                                    <LinkSetting label="توجيه الزر" pages={state.pages} linkType={heroProps.btnLinkType} linkValue={heroProps.btnLinkValue} onChangeType={(val) => { handleUpdateLive({ btnLinkType: val }); saveHistory(); }} onChangeValue={(val) => { handleUpdateLive({ btnLinkValue: val }); saveHistory(); }} />
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        <ColorPickerWithDropper label="خلفية الزر" value={heroProps.btnColor || '#ffffff'} onChange={(val) => handleUpdateLive({ btnColor: val })} onBlur={saveHistory} />
+                                        <ColorPickerWithDropper label="نص الزر" value={heroProps.btnTextColor || '#1e293b'} onChange={(val) => handleUpdateLive({ btnTextColor: val })} onBlur={saveHistory} />
                                     </div>
                                 </>
                             )}
@@ -1519,85 +1520,273 @@ case 'hero':
                     </div>
                 );
 
-case 'products':
+            case 'products':
                 const prodProps = selectedSection.props;
-                const updateProd = (key, value) => {
-                    dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } });
-                };
-                const saveProd = () => dispatch({ type: 'SAVE_HISTORY' });
+                const updateProd = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                const mockCategories = ['الكل', 'إلكترونيات', 'أزياء', 'أجهزة منزلية'];
+                const mockSubCategories = { 'إلكترونيات': ['جوالات', 'حواسيب'], 'أزياء': ['رجالي', 'نسائي'] };
+                const availableFilters = ['السعر', 'العلامة التجارية', 'اللون', 'المقاس'];
+
                 return (
                     <div className="space-y-4 pb-4">
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">مظهر وبنية شبكة المنتجات</h5>
-                            <div>
-                                <label className="text-[10px] text-gray-500 mb-1 block">نمط التصميم</label>
-                                <select value={prodProps.cardStyle || 'style1'} onChange={(e) => { updateProd('cardStyle', e.target.value); saveProd(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
-                                    <option value="style1">بطاقة مع زر إضافة سريع متطور</option>
-                                    <option value="style2">تضمين اسم وشعار الشركة المصنعة</option>
-                                </select>
-                            </div>
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">نوع الشبكة</h5>
+                            <select value={prodProps.listType || 'dynamic'} onChange={(e) => { updateProd('listType', e.target.value); saveHistory(); }} className="input-field w-full px-2 py-2 rounded-lg text-xs font-bold text-blue-700 bg-blue-50 border-blue-200">
+                                <option value="dynamic">ديناميكية (فلاتر)</option>
+                                <option value="static">ثابتة (يدوي)</option>
+                            </select>
+                            {prodProps.listType === 'static' ? (
+                                <input type="text" value={prodProps.productIds || ''} onChange={(e) => updateProd('productIds', e.target.value)} onBlur={saveHistory} placeholder="IDs: P1, P2..." className="input-field w-full px-2 py-1.5 rounded-lg text-xs mt-2" dir="ltr" />
+                            ) : (
+                                <>
+                                    <select value={prodProps.mainCategory || 'الكل'} onChange={(e) => { updateProd('mainCategory', e.target.value); updateProd('subCategory', ''); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-xs mt-2">
+                                        {mockCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                    <select disabled={prodProps.mainCategory === 'الكل'} value={prodProps.subCategory || ''} onChange={(e) => { updateProd('subCategory', e.target.value); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-xs mt-2 disabled:opacity-50">
+                                        <option value="">كل الفرعية</option>
+                                        {(mockSubCategories[prodProps.mainCategory] || []).map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                    <div className="pt-2 border-t mt-2">
+                                        <label className="text-[9px] font-bold text-gray-600 mb-1 block">أعمدة الفلترة (Dropdowns)</label>
+                                        <div className="grid grid-cols-2 gap-1">
+                                            {availableFilters.map(f => (
+                                                <label key={f} className="flex items-center gap-1 text-[9px] cursor-pointer bg-white p-1 rounded border hover:border-blue-200">
+                                                    <input type="checkbox" checked={(prodProps.activeFilters || []).includes(f)} onChange={() => {
+                                                        const curr = prodProps.activeFilters || [];
+                                                        updateProd('activeFilters', curr.includes(f) ? curr.filter(x => x !== f) : [...curr, f]);
+                                                        saveHistory();
+                                                    }} className="accent-blue-600" />
+                                                    {f}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-
                         <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">توزيع الأعمدة المستجيب</h5>
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">الأعمدة</h5>
                             <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label className="text-[9px] text-gray-500 mb-1 block">شاشة حاسوب</label>
-                                    <select value={prodProps.columns || 4} onChange={(e) => { updateProd('columns', parseInt(e.target.value)); saveProd(); }} className="input-field w-full px-1 py-1.5 rounded text-xs text-center">
-                                        <option value={3}>3 أعمدة</option>
-                                        <option value={4}>4 أعمدة</option>
-                                        <option value={5}>5 أعمدة</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[9px] text-gray-500 mb-1 block">تابلت</label>
-                                    <select value={prodProps.columnsTablet || 3} onChange={(e) => { updateProd('columnsTablet', parseInt(e.target.value)); saveProd(); }} className="input-field w-full px-1 py-1.5 rounded text-xs text-center">
-                                        <option value={2}>2 عمود</option>
-                                        <option value={3}>3 أعمدة</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[9px] text-gray-500 mb-1 block">الهاتف الذكي</label>
-                                    <select value={prodProps.columnsMobile || 2} disabled className="input-field w-full px-1 py-1.5 rounded text-xs text-center bg-gray-100 cursor-not-allowed opacity-80 font-bold text-blue-600">
-                                        <option value={2}>2 عمود (مثالي)</option>
-                                    </select>
-                                </div>
+                                <div><label className="text-[9px] text-gray-500 block text-center">حاسوب</label><input type="number" min="1" max="6" value={prodProps.columns || 4} onChange={(e) => { updateProd('columns', parseInt(e.target.value)); saveHistory(); }} className="input-field w-full px-1 py-1 text-center text-xs font-bold text-blue-700 rounded" /></div>
+                                <div><label className="text-[9px] text-gray-500 block text-center">تابلت</label><input type="number" min="1" max="4" value={prodProps.columnsTablet || 3} onChange={(e) => { updateProd('columnsTablet', parseInt(e.target.value)); saveHistory(); }} className="input-field w-full px-1 py-1 text-center text-xs font-bold text-blue-700 rounded" /></div>
+                                <div><label className="text-[9px] text-gray-500 block text-center">هاتف</label><input type="number" min="1" max="2" value={prodProps.columnsMobile || 2} onChange={(e) => { updateProd('columnsMobile', parseInt(e.target.value)); saveHistory(); }} className="input-field w-full px-1 py-1 text-center text-xs font-bold text-blue-700 rounded" /></div>
                             </div>
-                            <p className="text-[9px] text-blue-500 mt-1">💡 تم تأمين عرض عمودين متجاورين على الموبايل تلقائياً.</p>
                         </div>
                     </div>
                 );
 
-default:
-return <p className="text-sm text-gray-500 p-4">الإعدادات الخاصة بهذا القسم بسيطة.</p>;
-}
-};
-return (
-<div className="w-80 shrink-0 glass-panel shadow-medium border-r border-gray-200 flex flex-col h-full animate-slide-in-left">
-<div className="flex items-center justify-between p-4 border-b border-gray-200">
-<div className="flex items-center gap-2">
-<div className="p-2 rounded-lg bg-blue-50 text-blue-600"><Icon name="Settings" size={18} /></div>
-<h3 className="font-semibold text-gray-800">إعدادات العنصر</h3>
-</div>
-<button onClick={() => dispatch({ type: 'SELECT_SECTION', payload: null })} className="p-2 rounded-lg hover:bg-gray-100 transition-all">
-<Icon name="X" size={18} className="text-gray-500" />
-</button>
-</div>
-<div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
-<div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-<span className="text-xs text-blue-600 font-medium">نوع العنصر</span>
-<p className="font-semibold text-gray-800 mt-1">{widgetTypes.find(w => w.id === selectedSection.type)?.name || selectedSection.type}</p>
-</div>
-{renderSettings()}
-</div>
-<div className="p-4 border-t border-gray-200">
-<button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all font-medium">
-<Icon name="Trash" size={18} />
-حذف العنصر
-</button>
-</div>
-</div>
-);
+            case 'banner':
+                const banProps = selectedSection.props;
+                const updateBan = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                const addFloatingImage = async (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        const base64 = await fileToBase64(e.target.files[0]);
+                        updateBan('floatingImages', [...(banProps.floatingImages || []), { url: base64, x: 50, y: 50, size: 120, rounded: false }]);
+                        saveHistory();
+                    }
+                };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الخلفية</h5>
+                            <ColorPickerWithDropper label="لون الخلفية" value={banProps.bgColor || '#3b82f6'} onChange={(val) => updateBan('bgColor', val)} onBlur={saveHistory} />
+                            <input type="file" accept="image/*" onChange={async (e) => { if(e.target.files[0]){ const b = await fileToBase64(e.target.files[0]); updateBan('bgImage', b); saveHistory(); }}} className="text-[10px] w-full" />
+                        </div>
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الصور العائمة</h5>
+                            <button onClick={() => document.getElementById('float-img').click()} className="w-full py-1.5 bg-blue-50 text-blue-600 text-xs rounded-lg font-bold border border-blue-200">+ إضافة صورة عائمة</button>
+                            <input id="float-img" type="file" accept="image/*" onChange={addFloatingImage} className="hidden" />
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {(banProps.floatingImages || []).map((img, i) => (
+                                    <div key={i} className="p-2 bg-white border rounded text-[9px] space-y-1">
+                                        <div className="flex justify-between"><img src={img.url} className="w-6 h-6 rounded" /><button onClick={() => { const n = [...banProps.floatingImages]; n.splice(i, 1); updateBan('floatingImages', n); saveHistory(); }} className="text-red-500"><Icon name="Trash" size={12}/></button></div>
+                                        <SliderWithIdeal label="الحجم" value={img.size} min={50} max={300} ideal={120} onChange={(e) => { const n = [...banProps.floatingImages]; n[i].size = parseInt(e.target.value); updateBan('floatingImages', n); }} onDragEnd={saveHistory} />
+                                        <SliderWithIdeal label="X" value={img.x} min={0} max={100} ideal={50} onChange={(e) => { const n = [...banProps.floatingImages]; n[i].x = parseInt(e.target.value); updateBan('floatingImages', n); }} onDragEnd={saveHistory} />
+                                        <SliderWithIdeal label="Y" value={img.y} min={0} max={100} ideal={50} onChange={(e) => { const n = [...banProps.floatingImages]; n[i].y = parseInt(e.target.value); updateBan('floatingImages', n); }} onDragEnd={saveHistory} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الزر</h5>
+                            {banProps.showButton !== false && (
+                                <>
+                                    <SliderWithIdeal label="حجم خط الزر" value={banProps.btnSize || 16} min={12} max={28} ideal={16} onChange={(e) => updateBan('btnSize', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                                    <LinkSetting label="الرابط" pages={state.pages} linkType={banProps.btnLinkType} linkValue={banProps.btnLinkValue} onChangeType={(val) => { updateBan('btnLinkType', val); saveHistory(); }} onChangeValue={(val) => { updateBan('btnLinkValue', val); saveHistory(); }} />
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        <ColorPickerWithDropper label="خلفية" value={banProps.btnColor || '#fff'} onChange={(val) => updateBan('btnColor', val)} onBlur={saveHistory} />
+                                        <ColorPickerWithDropper label="نص" value={banProps.btnTextColor || '#1e293b'} onChange={(val) => updateBan('btnTextColor', val)} onBlur={saveHistory} />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+
+            case 'categories':
+                const catProps = selectedSection.props;
+                const updateCat = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                const updateSpecificCategory = (index, key, value) => { const nc = [...(catProps.categories || [])]; nc[index] = { ...nc[index], [key]: value }; updateCat('categories', nc); };
+
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الموقع والتظليل</h5>
+                            <div className="grid grid-cols-2 gap-2">
+                                <select value={catProps.contentAlign || 'center'} onChange={(e) => { updateCat('contentAlign', e.target.value); saveHistory(); }} className="input-field px-1 py-1 rounded text-[10px]"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select>
+                                <select value={catProps.contentPosition || 'bottom'} onChange={(e) => { updateCat('contentPosition', e.target.value); saveHistory(); }} className="input-field px-1 py-1 rounded text-[10px]"><option value="top">أعلى</option><option value="center">وسط</option><option value="bottom">أسفل</option></select>
+                            </div>
+                            <ColorPickerWithDropper label="لون التظليل" value={catProps.overlayColor || '#000'} onChange={(val) => updateCat('overlayColor', val)} onBlur={saveHistory} />
+                            <SliderWithIdeal label="كثافة التظليل" value={catProps.overlayOpacity || 40} min={0} max={90} ideal={40} onChange={(e) => updateCat('overlayOpacity', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                        </div>
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <div className="flex items-center justify-between border-b pb-1">
+                                <h5 className="text-[11px] font-bold text-gray-700">تفعيل الأزرار</h5>
+                                <button onClick={() => { updateCat('showCardButton', !catProps.showCardButton); saveHistory(); }} className={`toggle-switch w-8 h-4 rounded-full relative ${catProps.showCardButton ? 'active' : 'bg-gray-200'}`}><span className="toggle-dot absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-white shadow"></span></button>
+                            </div>
+                            {catProps.showCardButton && (
+                                <>
+                                    <SliderWithIdeal label="حجم خط الزر" value={catProps.btnSize || 12} min={10} max={20} ideal={12} onChange={(e) => updateCat('btnSize', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <ColorPickerWithDropper label="لون الزر" value={catProps.cardButtonBg || '#3b82f6'} onChange={(val) => updateCat('cardButtonBg', val)} onBlur={saveHistory} />
+                                        <ColorPickerWithDropper label="لون النص" value={catProps.cardButtonText || '#fff'} onChange={(val) => updateCat('cardButtonText', val)} onBlur={saveHistory} />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-2">إدارة الفئات</h5>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {(catProps.categories || []).map((cat, idx) => (
+                                    <div key={idx} className="p-2 bg-white border rounded text-[10px] space-y-1">
+                                        <p className="font-bold text-gray-700">{cat.name}</p>
+                                        <div className="flex gap-1">
+                                            <input type="text" value={cat.image || ''} onChange={(e) => updateSpecificCategory(idx, 'image', e.target.value)} onBlur={saveHistory} className="input-field flex-1 px-1 py-0.5 rounded text-[9px]" dir="ltr" placeholder="رابط صورة..." />
+                                            <button onClick={() => document.getElementById(`cat-up-${idx}`).click()} className="px-1 bg-gray-100 rounded hover:bg-blue-50 text-blue-600"><Icon name="Upload" size={10} /></button>
+                                            <input id={`cat-up-${idx}`} type="file" accept="image/*" onChange={async (e) => { if(e.target.files[0]){ const b = await fileToBase64(e.target.files[0]); updateSpecificCategory(idx, 'image', b); saveHistory(); }}} className="hidden" />
+                                        </div>
+                                        {catProps.showCardButton && <LinkSetting label="رابط الزر" pages={state.pages} linkType={cat.btnLinkType} linkValue={cat.btnLinkValue} onChangeType={(val) => { updateSpecificCategory(idx, 'btnLinkType', val); saveHistory(); }} onChangeValue={(val) => { updateSpecificCategory(idx, 'btnLinkValue', val); saveHistory(); }} />}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'features':
+                const featProps = selectedSection.props;
+                const updateFeat = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الألوان والحجم</h5>
+                            <ColorPickerWithDropper label="لون الأيقونات" value={featProps.iconColor || state.themeColors.primary} onChange={(val) => updateFeat('iconColor', val)} onBlur={saveHistory} />
+                            <ColorPickerWithDropper label="خلفية المربع" value={featProps.boxBg || '#fff'} onChange={(val) => updateFeat('boxBg', val)} onBlur={saveHistory} />
+                            <select value={featProps.boxSize || 'md'} onChange={(e) => { updateFeat('boxSize', e.target.value); saveHistory(); }} className="input-field w-full px-2 py-1 rounded-lg text-xs mt-2">
+                                <option value="sm">صغير</option>
+                                <option value="md">متوسط</option>
+                                <option value="lg">كبير</option>
+                            </select>
+                        </div>
+                    </div>
+                );
+
+            case 'newsletter':
+                const nlProps = selectedSection.props;
+                const updateNl = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">النصوص والأحجام</h5>
+                            <SliderWithIdeal label="حجم العنوان" value={nlProps.titleSize || 28} min={16} max={48} ideal={28} onChange={(e) => updateNl('titleSize', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                            <SliderWithIdeal label="حجم الوصف" value={nlProps.subtitleSize || 16} min={10} max={24} ideal={16} onChange={(e) => updateNl('subtitleSize', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                            <input type="text" value={nlProps.placeholderText || 'بريدك الإلكتروني...'} onChange={(e) => updateNl('placeholderText', e.target.value)} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs" />
+                            <input type="text" value={nlProps.btnText || 'اشتراك'} onChange={(e) => updateNl('btnText', e.target.value)} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs" />
+                        </div>
+                    </div>
+                );
+
+            case 'footer':
+                const ftProps = selectedSection.props;
+                const updateFt = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الألوان</h5>
+                            <ColorPickerWithDropper label="خلفية" value={ftProps.bgColor || state.themeColors.secondary} onChange={(val) => updateFt('bgColor', val)} onBlur={saveHistory} />
+                            <ColorPickerWithDropper label="نص" value={ftProps.textColor || '#fff'} onChange={(val) => updateFt('textColor', val)} onBlur={saveHistory} />
+                        </div>
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">الأعمدة</h5>
+                            {(ftProps.columns || []).map((col, idx) => (
+                                <div key={col.id} className="p-2 bg-white border rounded space-y-1">
+                                    <input type="text" value={col.title} onChange={(e) => { const nc = [...ftProps.columns]; nc[idx].title = e.target.value; updateFt('columns', nc); saveHistory(); }} className="input-field w-full px-2 py-1 text-[10px] font-bold" />
+                                    <textarea value={col.links.join('\n')} onChange={(e) => { const nc = [...ftProps.columns]; nc[idx].links = e.target.value.split('\n').filter(Boolean); updateFt('columns', nc); saveHistory(); }} placeholder="رابط لكل سطر" className="input-field w-full px-2 py-1 text-[9px] h-12 resize-none" />
+                                </div>
+                            ))}
+                            <button onClick={() => { updateFt('columns', [...(ftProps.columns || []), { id: `c-${Date.now()}`, title: 'جديد', links: [] }]); saveHistory(); }} className="w-full py-1 text-[10px] font-bold text-blue-600 bg-blue-50 rounded border border-blue-200">+ إضافة عمود</button>
+                        </div>
+                    </div>
+                );
+
+            case 'spacer':
+                const spProps = selectedSection.props;
+                const updateSp = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-3">المسافات</h5>
+                            <SliderWithIdeal label="أعلى" value={spProps.top || 20} min={0} max={150} ideal={20} onChange={(e) => updateSp('top', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                            <SliderWithIdeal label="أسفل" value={spProps.bottom || 20} min={0} max={150} ideal={20} onChange={(e) => updateSp('bottom', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                            <SliderWithIdeal label="يمين" value={spProps.right || 0} min={0} max={150} ideal={0} onChange={(e) => updateSp('right', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                            <SliderWithIdeal label="يسار" value={spProps.left || 0} min={0} max={150} ideal={0} onChange={(e) => updateSp('left', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                        </div>
+                    </div>
+                );
+
+            case 'text':
+                const txtProps = selectedSection.props;
+                const updateTxt = (key, value) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } }); };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">صندوق النص</h5>
+                            <SliderWithIdeal label="الهوامش الداخلية" value={txtProps.padding || 20} min={0} max={100} ideal={20} onChange={(e) => updateTxt('padding', parseInt(e.target.value))} onDragEnd={saveHistory} />
+                        </div>
+                        <p className="text-[10px] text-blue-500 font-bold px-2 leading-relaxed">💡 تلميح: انقر نقراً مزدوجاً على النص لتحريره وتغيير الخط والحجم من الشريط العلوي.</p>
+                    </div>
+                );
+
+            default: return <p className="text-sm text-gray-500 p-4">الإعدادات بسيطة.</p>;
+        }
+    };
+
+    return (
+        <div className="w-80 shrink-0 glass-panel shadow-medium border-r border-gray-200 flex flex-col h-full animate-slide-in-left">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600"><Icon name="Settings" size={18} /></div>
+                    <h3 className="font-semibold text-gray-800">إعدادات العنصر</h3>
+                </div>
+                <button onClick={() => dispatch({ type: 'SELECT_SECTION', payload: null })} className="p-2 rounded-lg hover:bg-gray-100 transition-all">
+                    <Icon name="X" size={18} className="text-gray-500" />
+                </button>
+            </div>
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+                    <span className="text-xs text-blue-600 font-medium">نوع العنصر</span>
+                    <p className="font-semibold text-gray-800 mt-1">{widgetTypes.find(w => w.id === selectedSection.type)?.name || selectedSection.type}</p>
+                </div>
+                {renderSettings()}
+            </div>
+            <div className="p-4 border-t border-gray-200">
+                <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all font-medium">
+                    <Icon name="Trash" size={18} />
+                    حذف العنصر
+                </button>
+            </div>
+        </div>
+    );
 };
 
 // ==================== CANVAS COMPONENT ====================
@@ -1620,11 +1809,13 @@ const Canvas = ({ viewport }) => {
     const getInitialPropsForWidget = (type) => {
         switch (type) {
             case 'hero': return { title: 'عنوان البانر الرئيسي', subtitle: 'أضف وصفاً جذاباً', buttonText: 'تسوق الآن', showButton: true, bannerHeight: 'md', overlay: 40, textColor: '#ffffff', mediaType: 'image', mediaUrls: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'], btnColor: '#ffffff', btnTextColor: '#1e293b', contentAlign: 'center', contentPosition: 'center', titleSize: 48 };
-            case 'products': return { title: 'منتجاتنا المميزة', columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1' };
+            case 'products': return { title: 'منتجاتنا المميزة', columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1', showFilters: true, listType: 'dynamic', mainCategory: 'الكل', activeFilters: [] };
             case 'categories': return { title: 'تصفح الفئات', columns: 4, columnsTablet: 3, columnsMobile: 2, overlayOpacity: 40, overlayColor: '#000000', contentAlign: 'center', contentPosition: 'bottom', showCardButton: false, categories: [ { id: 'c1', name: 'إلكترونيات', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' }, { id: 'c2', name: 'أزياء', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' } ] };
-            case 'banner': return { title: 'عرض خاص', description: 'احصل على خصم 50%', buttonText: 'تسوق الآن', bgColor: state.themeColors.primary };
-            case 'features': return { title: 'لماذا نحن؟', features: [{ id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات' }, { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }] };
-            case 'newsletter': return { title: 'اشترك في نشرتنا', subtitle: 'احصل على أحدث العروض', bgColor: '#f8fafc', textColor: '#1e293b' };
+            case 'banner': return { title: 'عرض خاص', description: 'احصل على خصم 50%', buttonText: 'تسوق الآن', bgColor: state.themeColors.primary, floatingImages: [] };
+            case 'features': return { title: 'لماذا نحن؟', boxBg: '#ffffff', boxSize: 'md', features: [{ id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات' }, { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }] };
+            case 'newsletter': return { title: 'اشترك في نشرتنا', subtitle: 'احصل على أحدث العروض', bgColor: '#f8fafc', textColor: '#1e293b', boxWidth: 'max-w-md', btnText: 'اشتراك', placeholderText: 'بريدك الإلكتروني...', btnSize: 14 };
+            case 'spacer': return { top: 20, bottom: 20, left: 0, right: 0 };
+            case 'text': return { text: 'انقر نقراً مزدوجاً لتحرير هذا النص، استخدم شريط الأدوات العائم لتغيير الخط واللون.', padding: 20 };
             case 'footer': return { bgColor: '#1e293b', textColor: '#ffffff' };
             default: return { title: 'قسم جديد' };
         }
@@ -1754,38 +1945,24 @@ const Canvas = ({ viewport }) => {
     );
 };
 
-// ==================== IN-PAGE CLEAN PUBLIC PREVIEW COMPONENT ====================
+// ==================== FULL SCREEN PREVIEW ====================
 const FullScreenPreview = ({ isOpen, onClose }) => {
     const [storeState, setStoreState] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
             const savedData = localStorage.getItem('storeBuilderPreviewState');
-            if (savedData) {
-                try { setStoreState(JSON.parse(savedData)); } catch(e) { console.error(e); }
-            }
+            if (savedData) { try { setStoreState(JSON.parse(savedData)); } catch(e) { console.error(e); } }
         }
     }, [isOpen]);
 
     if (!isOpen || !storeState) return null;
 
-    const activePage = storeState.pages.find(p => p.id === storeState.activePage) || storeState.pages;
+    const activePage = storeState.pages.find(p => p.id === storeState.activePage) || storeState.pages[0];
     const sections = activePage?.sections || [];
-    const isImmersive = activePage?.heroMode === 'immersive';
-    const headerTransparency = activePage?.headerTransparency || 0;
-
-    const heroSection = sections.find(s => s.type === 'hero');
-    const footerSection = sections.find(s => s.type === 'footer');
-    const movableSections = sections.filter(s => s.type !== 'hero' && s.type !== 'footer');
-
-    const hexToRgba = (hex, alpha) => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; };
-    const headerAlpha = 1 - (headerTransparency / 100);
-    const topBarBg = isImmersive ? hexToRgba(storeState.headerSettings.topBarBgColor, headerAlpha) : storeState.headerSettings.topBarBgColor;
-    const navBarBg = isImmersive ? hexToRgba(storeState.headerSettings.navBgColor, headerAlpha) : storeState.headerSettings.navBgColor;
-    const navIconColor = storeState.headerSettings.navIconColor || storeState.headerSettings.navTextColor;
 
     const renderStaticSection = (section) => {
-        const props = { section, isSelected: false, onSelect: null, onUpdate: null, viewport: window.innerWidth < 768 ? 'mobile' : 'desktop' };
+        const props = { section, isSelected: false, onSelect: null, onUpdate: null, viewport: 'desktop' };
         switch (section.type) {
             case 'hero': return <HeroSection {...props} />;
             case 'products': return <ProductsSection {...props} />;
@@ -1794,54 +1971,19 @@ const FullScreenPreview = ({ isOpen, onClose }) => {
             case 'features': return <FeaturesSection {...props} />;
             case 'newsletter': return <NewsletterSection {...props} />;
             case 'footer': return <FooterSection {...props} />;
+            case 'spacer': return <SpacerSection {...props} />;
+            case 'text': return <TextSection {...props} />;
             default: return null;
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto flex flex-col" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
-            {/* زر العودة الذكي العائم لإغلاق المعاينة والعودة للـ Editor */}
-            <button onClick={onClose} className="fixed bottom-6 left-6 z-50 bg-gray-900/90 text-white backdrop-blur px-5 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 border border-white/10 hover:bg-black transition-all active:scale-95 text-sm animate-bounce">
-                <Icon name="X" size={16} /> العودة إلى لوحة التحكم
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto flex flex-col" style={{ '--accent': storeState.themeColors.primary, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
+            <button onClick={onClose} className="fixed bottom-6 left-6 z-50 bg-gray-900/90 text-white backdrop-blur px-5 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 border border-white/10 hover:bg-black transition-all text-sm animate-bounce">
+                <Icon name="X" size={16} /> العودة للتحرير
             </button>
-
-            <div className={isImmersive ? 'absolute top-0 left-0 right-0 z-50 w-full' : 'w-full shrink-0'}>
-                {activePage?.showTopBar && storeState.headerSettings.topBarVisible && (
-                    <div className="py-2 px-6 flex items-center justify-between text-xs font-medium" style={{ backgroundColor: topBarBg, color: storeState.headerSettings.topBarTextColor }}>
-                        <div className={`flex items-center gap-3 ${storeState.headerSettings.socialPosition === 'right' ? 'order-1' : 'order-3'}`}>
-                            {storeState.headerSettings.socialLinks.map(link => link.visible && link.url && (
-                                <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={{ color: storeState.headerSettings.socialColor }}><Icon name={link.icon} size={storeState.headerSettings.socialIconSize || 15} /></a>
-                            ))}
-                        </div>
-                        <div className="flex-1 text-center order-2 px-4">{storeState.headerSettings.topBarText}</div>
-                    </div>
-                )}
-                <nav className="py-4 px-8 flex items-center w-full gap-4" style={{ backgroundColor: navBarBg, color: storeState.headerSettings.navTextColor, borderBottom: activePage?.headerTransparency > 20 ? 'none' : '1px solid rgba(226, 232, 240, 0.5)' }}>
-                    {storeState.headerSettings.navOrder.map(itemId => {
-                        const item = storeState.headerSettings.navItems.find(i => i.id === itemId);
-                        if (!item || !item.visible) return null;
-                        if (item.type === 'logo') return (
-                            <div key={item.id} className="flex items-center gap-2 mx-auto shrink-0">
-                                {storeState.headerSettings.logoImage && <img src={storeState.headerSettings.logoImage} alt="Logo" style={{ height: `${storeState.headerSettings.logoSize}px` }} className="object-contain" />}
-                                {storeState.headerSettings.showLogoText && <span className="font-bold font-display text-lg" style={{ color: storeState.themeColors.primary }}>{storeState.headerSettings.logo}</span>}
-                            </div>
-                        );
-                        if (item.type === 'menu' || item.type === 'search') return <button key={item.id} style={{ color: navIconColor }}><Icon name={item.type === 'menu' ? 'Menu' : 'Search'} size={storeState.headerSettings.navIconSize || 20} /></button>;
-                        if (item.type === 'cart') return <button key={item.id} className="relative" style={{ color: navIconColor }}><Icon name="ShoppingCart" size={storeState.headerSettings.navIconSize || 20} />{item.count > 0 && <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full text-white text-[9px] flex items-center justify-center font-bold" style={{ backgroundColor: storeState.themeColors.primary }}>{item.count}</span>}</button>;
-                        if (item.type === 'language') return <div key={item.id} className="text-xs font-bold border rounded-full px-2 py-0.5 opacity-80" style={{ borderColor: `${navIconColor}40`, color: navIconColor }}>العربية</div>;
-                        return null;
-                    })}
-                </nav>
-            </div>
-
             <div className="flex-1 flex flex-col w-full">
-                {heroSection && <div>{renderStaticSection(heroSection)}</div>}
-                {movableSections.map(section => (
-                    <div key={section.id} className="w-full">
-                        {renderStaticSection(section)}
-                    </div>
-                ))}
-                {footerSection && <div className="mt-auto">{renderStaticSection(footerSection)}</div>}
+                {sections.map(section => <div key={section.id} className="w-full">{renderStaticSection(section)}</div>)}
             </div>
         </div>
     );
@@ -1860,9 +2002,7 @@ const MainAppContent = () => {
             try {
                 localStorage.setItem('storeBuilderProState', JSON.stringify({ pages: state.pages, activePage: state.activePage, headerSettings: state.headerSettings, themeColors: state.themeColors, hoverEffects: state.hoverEffects }));
                 setAutoSaveStatus('saved');
-            } catch (e) {
-                setAutoSaveStatus('error');
-            }
+            } catch (e) { setAutoSaveStatus('error'); }
         }, 800);
         setAutoSaveStatus('saving');
         return () => clearTimeout(saveTimeout);
@@ -1880,60 +2020,31 @@ const MainAppContent = () => {
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); 
             const url = URL.createObjectURL(blob); 
             const a = document.createElement('a'); a.href = url; a.download = `store-design-${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); 
-            addToast('تم تصدير التصميم بنجاح!', 'success');
-        } catch(e) {
-            addToast('حدث خطأ أثناء التصدير.', 'error');
-        }
+            addToast('تم التصدير!', 'success');
+        } catch(e) { addToast('خطأ!', 'error'); }
     };
     
     const handleImport = (e) => { 
-        const file = e.target.files; 
+        const file = e.target.files[0]; 
         if (file) { 
             const reader = new FileReader(); 
             reader.onload = (event) => { 
-                try { 
-                    const data = JSON.parse(event.target.result); 
-                    dispatch({ type: 'IMPORT_DATA', payload: data }); 
-                    dispatch({ type: 'SAVE_HISTORY' }); 
-                    addToast('تم استيراد التصميم بنجاح!', 'success');
-                } catch (err) { 
-                    addToast('خطأ: الملف غير صالح أو تالف.', 'error'); 
-                } 
+                try { const data = JSON.parse(event.target.result); dispatch({ type: 'IMPORT_DATA', payload: data }); dispatch({ type: 'SAVE_HISTORY' }); addToast('تم الاستيراد!', 'success'); } catch (err) { addToast('ملف غير صالح!', 'error'); } 
             }; 
             reader.readAsText(file); 
         } 
         e.target.value = ''; 
     };
     
-    const handleUndo = () => dispatch({ type: 'UNDO' });
-    const handleRedo = () => dispatch({ type: 'REDO' });
-    
-    const canUndo = state.historyIndex > 0;
-    const canRedo = state.historyIndex < state.history.length - 1;
-    
     return (
         <AppContext.Provider value={{ state, dispatch }}>
-            <div className="h-screen w-full flex flex-col overflow-hidden relative bg-gray-50" style={{ fontFamily: state.themeColors.fontFamily || 'Cairo' }}>
+            <div className="h-screen w-full flex flex-col overflow-hidden relative" style={{ fontFamily: state.themeColors.fontFamily || 'Cairo', '--accent': state.themeColors.primary, '--accent-dark': state.themeColors.secondary, '--accent-light': state.themeColors.accent, backgroundColor: state.themeColors.background || '#f8fafc' }}>
                 <FloatingToolbar />
-                <TopToolbar viewport={viewport} setViewport={setViewport} onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} onExport={handleExport} onImport={handleImport} autoSaveStatus={autoSaveStatus} setIsLivePreviewOpen={setIsLivePreviewOpen} />
+                <TopToolbar viewport={viewport} setViewport={setViewport} onUndo={() => dispatch({ type: 'UNDO' })} onRedo={() => dispatch({ type: 'REDO' })} canUndo={state.historyIndex > 0} canRedo={state.historyIndex < state.history.length - 1} onExport={handleExport} onImport={handleImport} autoSaveStatus={autoSaveStatus} setIsLivePreviewOpen={setIsLivePreviewOpen} />
                 
-                <div className="fixed top-16 right-0 bottom-0 z-40 pointer-events-none w-80">
-                    <div className="pointer-events-auto h-full w-full relative">
-                        <Sidebar />
-                    </div>
-                </div>
-                
-                <div className="fixed top-16 left-0 bottom-0 z-40 pointer-events-none">
-                    <div className="pointer-events-auto h-full w-full">
-                        {state.selectedSection && <SettingsPanel viewport={viewport} />}
-                    </div>
-                </div>
-                
-                <div className="flex-1 w-full pt-16 relative z-0 flex overflow-hidden">
-                    <Canvas viewport={viewport} />
-                </div>
-
-                {/* تفعيل شاشة المعاينة الفورية بملء الشاشة لتعمل على الجوال والكمبيوتر فوراً بسلاسة تامة */}
+                <div className="fixed top-16 right-0 bottom-0 z-40 pointer-events-none w-80"><div className="pointer-events-auto h-full w-full relative"><Sidebar /></div></div>
+                <div className="fixed top-16 left-0 bottom-0 z-40 pointer-events-none"><div className="pointer-events-auto h-full w-full">{state.selectedSection && <SettingsPanel viewport={viewport} />}</div></div>
+                <div className="flex-1 w-full pt-16 relative z-0 flex overflow-hidden"><Canvas viewport={viewport} /></div>
                 <FullScreenPreview isOpen={isLivePreviewOpen} onClose={() => setIsLivePreviewOpen(false)} />
             </div>
         </AppContext.Provider>
