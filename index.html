@@ -568,6 +568,7 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
     };
 
     // الدالة الجديدة لفتح المعاينة الخارجية في لسان تبويب منفصل
+// الدالة المحدثة المتوافقة مع GitHub Pages والسيرفرات المحلية
     const handlePreview = () => {
         try {
             // حفظ الحالة الحالية للتصميم لكي تقرأها الصفحة الجديدة
@@ -580,8 +581,10 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
             };
             localStorage.setItem('storeBuilderPreviewState', JSON.stringify(previewData));
             
-            // فتح الرابط الحالي مع إضافة متغير المعاينة في تبويب جديد
-            const previewUrl = window.location.origin + window.location.pathname + '?preview=true';
+            // حل مشكلة GitHub Pages: نأخذ الرابط كاملاً ونزيل منه أي متغيرات قديمة ثم نضع مغير المعاينة
+            const currentHref = window.location.href.split('?');
+            const previewUrl = currentHref + '?preview=true';
+            
             window.open(previewUrl, '_blank');
         } catch (e) {
             addToast('حدث خطأ أثناء تحضير صفحة المعاينة', 'error');
