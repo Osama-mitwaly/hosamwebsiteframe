@@ -569,9 +569,9 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
 
     // الدالة الجديدة لفتح المعاينة الخارجية في لسان تبويب منفصل
 // الدالة المحدثة المتوافقة مع GitHub Pages والسيرفرات المحلية
+    // الدالة المحدثة لنقل البيانات عبر الرابط مباشرة لتعمل على الموبايل والكمبيوتر
     const handlePreview = () => {
         try {
-            // حفظ الحالة الحالية للتصميم لكي تقرأها الصفحة الجديدة
             const previewData = {
                 pages: state.pages,
                 headerSettings: state.headerSettings,
@@ -579,15 +579,20 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
                 hoverEffects: state.hoverEffects,
                 activePage: state.activePage
             };
-            localStorage.setItem('storeBuilderPreviewState', JSON.stringify(previewData));
             
-            // حل مشكلة GitHub Pages: نأخذ الرابط كاملاً ونزيل منه أي متغيرات قديمة ثم نضع مغير المعاينة
+            // تحويل البيانات إلى نص وتشفيرها لتبسيط الرابط
+            const jsonString = JSON.stringify(previewData);
+            // استخدام encodeURIComponent لضمان عدم تلف النصوص العربية أثناء النقل
+            const base64Data = btoa(encodeURIComponent(jsonString));
+            
+            // بناء الرابط الحامل للبيانات
             const currentHref = window.location.href.split('?');
-            const previewUrl = currentHref + '?preview=true';
+            const previewUrl = currentHref + '?preview=true&data=' + base64Data;
             
+            // فتح الرابط (يمكنك الآن نسخه وإرساله للواتساب أو فتحه من الهاتف مباشرة)
             window.open(previewUrl, '_blank');
         } catch (e) {
-            addToast('حدث خطأ أثناء تحضير صفحة المعاينة', 'error');
+            addToast('حدث خطأ أثناء تشفير بيانات المعاينة', 'error');
         }
     };
 
@@ -1768,15 +1773,26 @@ const PublicStoreView = () => {
     const [storeState, setStoreState] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // جلب بيانات التصميم التي تم حفظها من الـ Editor
-        const savedData = localStorage.getItem('storeBuilderPreviewState');
-        if (savedData) {
+   useEffect(() => {
+        // جلب البيانات المشفرة القادمة من رابط الـ URL مباشرة
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        
+        if (encodedData) {
             try {
-                setStoreState(JSON.parse(savedData));
+                // فك تشفير البيانات وإعادتها لأصلها العربي السليم
+                const decodedJson = decodeURIComponent(atob(encodedData));
+                setStoreState(JSON.parse(decodedJson));
             } catch (e) {
-                console.error("خطأ في قراءة بيانات المعاينة", e);
+                console.error("خطأ في فك تشفير بيانات الرابط", e);
+                // محاولة برمجية احتياطية من الذاكرة المحلية إذا فشل الرابط
+                const localData = localStorage.getItem('storeBuilderPreviewState');
+                if (localData) setStoreState(JSON.parse(localData));
             }
+        } else {
+            // إذا فتحت الرابط القديم بدون بيانات، سيحاول القراءة من الذاكرة المحلية
+            const localData = localStorage.getItem('storeBuilderPreviewState');
+            if (localData) setStoreState(JSON.parse(localData));
         }
         setLoading(false);
     }, []);
