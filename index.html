@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Builder Pro - Modified</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg-primary: #f8fafc;
+--bg-secondary: #ffffff;
+--bg-tertiary: #f1f5f9;
+--fg-primary: #1e293b;
+--fg-secondary: #64748b;
+--accent: #3b82f6;
+--accent-light: #60a5fa;
+--accent-dark: #2563eb;
+--pastel-blue: #dbeafe;
+--pastel-blue-light: #eff6ff;
+--border: #e2e8f0;
+--success: #10b981;
+--warning: #f59e0b;
+--danger: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+font-family: 'Cairo', sans-serif;
+background: linear-gradient(135deg, var(--pastel-blue-light) 0%, var(--bg-primary) 50%, var(--pastel-blue) 100%);
+color: var(--fg-primary);
+overflow-x: hidden;
+min-height: 100vh;
+}
+.font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+.glass-panel {
+background: rgba(255, 255, 255, 0.85);
+backdrop-filter: blur(20px);
+border: 1px solid var(--border);
+}
+.shadow-soft { box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05); }
+.shadow-medium { box-shadow: 0 8px 30px rgba(59, 130, 246, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04); }
+.dragging { opacity: 0.6; transform: scale(1.02) rotate(1deg); }
+.drop-zone-active {
+border: 2px dashed var(--accent) !important;
+background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(96, 165, 250, 0.08)) !important;
+}
+.section-selected {
+outline: 2px solid var(--accent) !important;
+outline-offset: 2px;
+box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+.widget-item { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.widget-item:hover {
+transform: translateX(-6px);
+background: linear-gradient(135deg, var(--pastel-blue-light), var(--pastel-blue));
+border-color: var(--accent-light);
+}
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-tertiary); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--accent-light); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideInLeft { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
+.animate-slide-in-left { animation: slideInLeft 0.3s ease-out; }
+.animate-fade-scale { animation: fadeScale 0.25s ease-out; }
+.animate-pulse-soft { animation: pulse 2s ease-in-out infinite; }
+
+[contenteditable] {
+    min-width: 40px;
+    min-height: 1.2em;
+    display: inline-block;
+    transition: all 0.2s;
+    cursor: text;
+}
+[contenteditable]:not(:focus):hover {
+    outline: 1px dashed rgba(100, 116, 139, 0.4);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+[contenteditable]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+[contenteditable]:empty:before {
+    content: attr(data-placeholder);
+    opacity: 0.5;
+    pointer-events: none;
+    display: block;
+    font-style: italic;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+color: white;
+transition: all 0.25s ease;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35); }
+.btn-secondary {
+background: linear-gradient(135deg, var(--pastel-blue-light), var(--pastel-blue));
+color: var(--accent-dark);
+transition: all 0.25s ease;
+}
+.btn-secondary:hover { background: linear-gradient(135deg, var(--pastel-blue), #bfdbfe); }
+.input-field {
+background: var(--bg-secondary);
+border: 1.5px solid var(--border);
+transition: all 0.2s ease;
+}
+.input-field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+.canvas-bg {
+background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.04) 0%, transparent 50%),
+linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+}
+.header-immersive { position: absolute; top: 0; left: 0; right: 0; z-index: 50; }
+.product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15); }
+.product-card:hover .product-image { transform: scale(1.05); }
+.product-image { transition: transform 0.4s ease; }
+.nav-item-drag { cursor: grab; transition: all 0.2s ease; }
+.nav-item-drag:active { cursor: grabbing; }
+.nav-item-drag:hover { background: var(--pastel-blue); border-radius: 8px; }
+.slider-track { background: linear-gradient(90deg, var(--pastel-blue-light), var(--accent-light)); border-radius: 4px; }
+input[type="range"]::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 16px;
+height: 16px;
+border-radius: 50%;
+background: linear-gradient(135deg, #3b82f6, #2563eb);
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+transform: scale(1.15);
+box-shadow: 0 3px 10px rgba(59, 130, 246, 0.5);
+}
+input[type="range"]::-moz-range-thumb {
+width: 16px;
+height: 16px;
+border-radius: 50%;
+background: linear-gradient(135deg, #3b82f6, #2563eb);
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+}
+.toggle-switch { transition: all 0.3s ease; }
+.toggle-switch.active { background: var(--accent); }
+.toggle-switch .toggle-dot { transition: all 0.3s ease; }
+.toggle-switch.active .toggle-dot { transform: translateX(-20px); }
+.sub-page-indent { margin-right: 1.5rem; border-right: 2px solid var(--accent-light); padding-right: 0.5rem; }
+.line-clamp-2 {
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+*, *::before, *::after {
+animation-duration: 0.01ms !important;
+animation-iteration-count: 1 !important;
+transition-duration: 0.01ms !important;
+}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useReducer, useContext, createContext, useRef, useCallback, useMemo } = React;
+
+// ==================== INITIAL STATE ====================
+const initialState = {
+pages: [
+{
+id: 'page-1',
+name: 'الصفحة الرئيسية',
+slug: 'home',
+showTopBar: true,
+heroMode: 'standard',
+headerTransparency: 0,
+parentId: null,
+sections: [
+{
+id: 'hero-1', type: 'hero',
+props: {
+title: 'اكتشف أفضل المنتجات',
+subtitle: 'تسوق الآن واحصل على خصم 30% على طلبك الأول',
+buttonText: 'تسوق الآن', buttonLink: '#products',
+showButton: true,
+mediaType: 'image',
+mediaUrls: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'],
+overlay: 40, textColor: '#ffffff',
+contentAlign: 'center', contentPosition: 'center',
+titleSize: 48, titleFont: 'display',
+bannerHeight: 'md',
+btnColor: '#ffffff', btnTextColor: '#1e293b', btnSize: 'md', btnLinkType: 'external'
+}
+},
+{
+id: 'products-1', type: 'products',
+props: {
+title: 'منتجات مميزة', listType: 'dynamic', productIds: '',
+columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1',
+mainCategory: 'الكل', enableSub: false, subCategory: 'الكل', activeFilters: [],
+showAddToCart: true, showFilters: true, showRating: true
+}
+},
+{
+id: 'footer-1', type: 'footer',
+props: { bgColor: '#1e293b', textColor: '#ffffff' }
+}
+]
+}
+],
+activePage: 'page-1',
+selectedSection: null,
+selectedNavItem: null,
+headerSettings: {
+logo: 'متجر برو',
+logoImage: '',
+showLogoText: true,
+logoSize: 40,
+logoShape: 'default',
+topBarVisible: true,
+topBarText: 'توصيل مجاني للطلبات فوق 200 ريال',
+topBarBgColor: '#3b82f6',
+topBarTextColor: '#ffffff',
+navBgColor: '#ffffff',
+navTextColor: '#1e293b',
+navIconColor: '#1e293b',
+navIconSize: 20,
+socialPosition: 'left',
+socialColor: '#ffffff',
+socialIconSize: 15,
+socialLinks: [
+{ id: 'facebook', name: 'فيسبوك', url: '#', icon: 'Facebook', visible: true },
+{ id: 'instagram', name: 'إنستغرام', url: '#', icon: 'Instagram', visible: true },
+{ id: 'twitter', name: 'تويتر', url: '#', icon: 'Twitter', visible: true },
+{ id: 'tiktok', name: 'تيك توك', url: '#', icon: 'TikTok', visible: true },
+{ id: 'youtube', name: 'يوتيوب', url: '#', icon: 'YouTube', visible: true },
+{ id: 'snapchat', name: 'سناب شات', url: '#', icon: 'Snapchat', visible: true },
+{ id: 'whatsapp', name: 'واتساب', url: '#', icon: 'WhatsApp', visible: true }
+],
+navItems: [
+{ id: 'menu', type: 'menu', label: 'القائمة', visible: true },
+{ id: 'search', type: 'search', label: 'البحث', visible: true },
+{ id: 'logo', type: 'logo', label: 'الشعار', visible: true },
+{ id: 'cart', type: 'cart', label: 'السلة', visible: true, count: 3 },
+{ id: 'language', type: 'language', label: 'EN/عربي', visible: true }
+],
+navOrder: ['menu', 'search', 'logo', 'cart', 'language']
+},
+themeColors: {
+primary: '#3b82f6', secondary: '#1e40af', accent: '#f59e0b',
+background: '#f8fafc', text: '#1e293b', cardBg: '#ffffff',
+fontFamily: 'Cairo'
+},
+savedThemes: [],
+hoverEffects: { productCardScale: 1.02, productImageScale: 1.08 },
+history: [],
+historyIndex: -1
+};
+
+// ==================== REDUCER ====================
+function appReducer(state, action) {
+switch (action.type) {
+case 'ADD_SECTION': {
+const newPages = state.pages.map(page => page.id === state.activePage ? { ...page, sections: [...page.sections, action.payload] } : page);
+return { ...state, pages: newPages, selectedSection: action.payload.id };
+}
+case 'UPDATE_SECTION': {
+const newPages = state.pages.map(page => page.id === state.activePage ? { ...page, sections: page.sections.map(s => s.id === action.payload.id ? { ...s, props: { ...s.props, ...action.payload.props } } : s) } : page);
+return { ...state, pages: newPages };
+}
+case 'DELETE_SECTION': {
+const newPages = state.pages.map(page => page.id === state.activePage ? { ...page, sections: page.sections.filter(s => s.id !== action.payload) } : page);
+return { ...state, pages: newPages, selectedSection: null };
+}
+case 'REORDER_SECTIONS': {
+const newPages = state.pages.map(page => page.id === state.activePage ? { ...page, sections: action.payload } : page);
+return { ...state, pages: newPages };
+}
+case 'SELECT_SECTION': return { ...state, selectedSection: action.payload };
+case 'SET_ACTIVE_PAGE': return { ...state, activePage: action.payload, selectedSection: null };
+case 'ADD_PAGE': {
+const newPage = {
+...action.payload,
+sections: [],
+showTopBar: true,
+heroMode: 'standard',
+headerTransparency: 0
+};
+return {
+...state,
+pages: [...state.pages, newPage],
+activePage: newPage.id
+};
+}
+case 'DELETE_PAGE': {
+const pagesToDelete = [action.payload, ...state.pages.filter(p => p.parentId === action.payload).map(p => p.id)];
+const filteredPages = state.pages.filter(page => !pagesToDelete.includes(page.id));
+return {
+...state,
+pages: filteredPages,
+activePage: filteredPages[0]?.id || null
+};
+}
+case 'UPDATE_PAGE_SETTINGS': {
+const newPages = state.pages.map(page => page.id === state.activePage ? { ...page, ...action.payload } : page);
+return { ...state, pages: newPages };
+}
+case 'UPDATE_THEME': return { ...state, themeColors: { ...state.themeColors, ...action.payload } };
+case 'SAVE_CUSTOM_THEME': return { ...state, savedThemes: [...state.savedThemes, action.payload] };
+case 'UPDATE_HEADER': return { ...state, headerSettings: { ...state.headerSettings, ...action.payload } };
+case 'UPDATE_NAV_ORDER': {
+const newNavItems = action.payload.map(id => state.headerSettings.navItems.find(item => item.id === id) || { id, type: id, label: id, visible: true });
+return { ...state, headerSettings: { ...state.headerSettings, navItems: newNavItems, navOrder: action.payload } };
+}
+case 'UPDATE_NAV_ITEM': {
+const newNavItems = state.headerSettings.navItems.map(item => item.id === action.payload.id ? { ...item, ...action.payload.props } : item);
+return { ...state, headerSettings: { ...state.headerSettings, navItems: newNavItems } };
+}
+case 'UPDATE_HOVER_EFFECTS': return { ...state, hoverEffects: { ...state.hoverEffects, ...action.payload } };
+case 'SAVE_HISTORY': {
+const newHistory = state.history.slice(0, state.historyIndex + 1);
+newHistory.push(JSON.stringify({ pages: state.pages, themeColors: state.themeColors, headerSettings: state.headerSettings, hoverEffects: state.hoverEffects }));
+return { ...state, history: newHistory.slice(-30), historyIndex: Math.min(newHistory.length - 1, 29) };
+}
+case 'UNDO': {
+if (state.historyIndex > 0) { const prev = JSON.parse(state.history[state.historyIndex - 1]); return { ...state, ...prev, historyIndex: state.historyIndex - 1, selectedSection: null }; }
+return state;
+}
+case 'REDO': {
+if (state.historyIndex < state.history.length - 1) { const next = JSON.parse(state.history[state.historyIndex + 1]); return { ...state, ...next, historyIndex: state.historyIndex + 1, selectedSection: null }; }
+return state;
+}
+case 'IMPORT_DATA': return { ...state, pages: action.payload.pages || state.pages, themeColors: action.payload.themeColors || state.themeColors, savedThemes: action.payload.savedThemes || state.savedThemes, headerSettings: action.payload.headerSettings || state.headerSettings, hoverEffects: action.payload.hoverEffects || state.hoverEffects, selectedSection: null };
+case 'LOAD_STATE': return { ...state, ...action.payload };
+default: return state;
+}
+}
+
+// ==================== CONTEXT ====================
+const AppContext = createContext();
+
+// ==================== WIDGET TYPES ====================
+const widgetTypes = [
+{ id: 'hero', name: 'بانر رئيسي', icon: 'Layout', description: 'صورة/فيديو مع نص' },
+{ id: 'products', name: 'شبكة منتجات', icon: 'Grid', description: 'عرض منتجات ديناميكي أو ثابت' },
+{ id: 'categories', name: 'الفئات', icon: 'Folder', description: 'عرض فئات المنتجات' },
+{ id: 'banner', name: 'بانر ترويجي', icon: 'Image', description: 'إعلان أو عرض خاص' },
+{ id: 'features', name: 'المميزات', icon: 'Star', description: 'خدمات وعروض المتجر' },
+{ id: 'testimonial', name: 'آراء العملاء', icon: 'Quote', description: 'تقييمات ومراجعات' },
+{ id: 'newsletter', name: 'النشرة البريدية', icon: 'Mail', description: 'اشتراك بالقائمة' },
+{ id: 'footer', name: 'التذييل', icon: 'Layout', description: 'معلومات المتجر' },
+{ id: 'spacer', name: 'مسافة', icon: 'Layout', description: 'إضافة مساحة فارغة' },
+{ id: 'text', name: 'نص', icon: 'FileText', description: 'نص قابل للتحرير' }
+];
+
+// ==================== ICONS COMPONENT ====================
+const Icon = ({ name, size = 20, className = '' }) => {
+const icons = {
+Layout: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
+Grid: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+Folder: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+Image: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>,
+Star: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>,
+Quote: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"/></svg>,
+Mail: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+Monitor: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+Tablet: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>,
+Smartphone: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>,
+Download: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21,15v4a2,2,0,0,1,-2,2H5a2,2,0,0,1,-2,-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+Upload: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21,15v4a2,2,0,0,1,-2,2H5a2,2,0,0,1,-2,-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+Undo: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="1,4 1,10 7,10"/><path d="M3.51,15a9,9,0,1,0,2.13,-9.36L1,10"/></svg>,
+Redo: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23,4 23,10 17,10"/><path d="M20.49,15a9,9,0,1,1,-2.12,-9.36L23,10"/></svg>,
+Trash: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2,0,0,1,-2,2H7a2,2,0,0,1,-2,-2V6m3,0V4a2,2,0,0,1,2,-2h4a2,2,0,0,1,2,2v2"/></svg>,
+Plus: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+Settings: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+FileText: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14,2H6a2,2,0,0,0,-2,2v16a2,2,0,0,0,2,2h12a2,2,0,0,0,2,-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+Palette: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10c.926,0,1.648,-.746,1.648,-1.688 0,-.437,-.18,-.835,-.437,-1.125,-.29,-.289,-.438,-.652,-.438,-1.125a1.64,1.64,0,0,1,1.668,-1.668h1.996c3.051,0,5.555,-2.503,5.555,-5.555C21.965,6.012,17.461,2,12,2z"/></svg>,
+X: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+GripVertical: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>,
+Eye: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M1,12s4,-8,11,-8,11,8,11,8,-4,8,-11,8,-11,-8,-11,-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+EyeOff: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+Menu: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="12" y2="12"/><line x1="3" y1="6" x2="12" y2="6"/><line x1="3" y1="18" x2="12" y2="18"/></svg>,
+Search: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+ShoppingCart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>,
+Layers: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12,2 2,7 12,12 22,7"/><polyline points="2,17 12,22 22,17"/><polyline points="2,12 12,17 22,12"/></svg>,
+Header: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>,
+Check: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20,6 9,17 4,12"/></svg>,
+ChevronDown: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"/></svg>,
+Bold: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>,
+Italic: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>,
+Facebook: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
+Instagram: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>,
+Twitter: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>,
+TikTok: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>,
+YouTube: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"/></svg>,
+Snapchat: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2a4 4 0 0 1 4 4v1.5a1.5 1.5 0 0 0 3 0c0 .83-.55 1.5-1.3 1.83A4.5 4.5 0 0 1 19 13.5a1.5 1.5 0 0 1-3 0 1 1 0 0 0-1-1 1 1 0 0 0-1 1c0 1.5-1 3-2 3s-2-1.5-2-3a1 1 0 0 0-1-1 1 1 0 0 0-1 1 1.5 1.5 0 0 1-3 0 4.5 4.5 0 0 1 1.3-4.17C6.55 10 6 9.33 6 8.5a1.5 1.5 0 0 0 3 0V6a4 4 0 0 1 4-4z"/></svg>,
+WhatsApp: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
+Globe: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+Video: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
+Pipette: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22l5.5-5.5"/><path d="M14 6l4-4 4 4-4 4"/><path d="M12.5 7.5l4 4"/><path d="M18 10L7.5 20.5a2.83 2.83 0 0 1-4 0 2.83 2.83 0 0 1 0-4L14 6"/></svg>,
+Truck: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-9l-5-4h-3v13h3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>,
+Shield: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+CreditCard: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+Headphones: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+};
+return icons[name] || null;
+};
+
+// ==================== UTILITY FUNCTIONS & TOAST ====================
+const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+const ToastContext = createContext(null);
+const ToastProvider = ({ children }) => {
+    const [toasts, setToasts] = useState([]);
+    const addToast = (message, type = 'success') => {
+        const id = generateId();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+    };
+    return (
+        <ToastContext.Provider value={{ addToast }}>
+            {children}
+            <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2">
+                {toasts.map(t => (
+                    <div key={t.id} className={`px-4 py-3 rounded-xl shadow-lg text-sm font-bold text-white animate-slide-in-right flex items-center gap-2 ${t.type === 'error' ? 'bg-red-500' : t.type === 'warning' ? 'bg-orange-500' : 'bg-green-500'}`}>
+                        <Icon name={t.type === 'error' ? 'X' : 'Check'} size={16} />
+                        {t.message}
+                    </div>
+                ))}
+            </div>
+        </ToastContext.Provider>
+    );
+};
+
+// ==================== UTILITY COMPONENTS ====================
+const ColorPickerWithDropper = ({ label, value, onChange, onBlur }) => {
+const pickColor = async () => {
+if (window.EyeDropper) {
+try {
+const eyeDropper = new window.EyeDropper();
+const result = await eyeDropper.open();
+onChange(result.sRGBHex);
+if (onBlur) onBlur();
+} catch (e) {
+console.log('تم إلغاء الالتقاط');
+}
+} else {
+alert('متصفحك الحالي لا يدعم ميزة القطارة.');
+}
+};
+return (
+<div>
+<label className="text-[10px] text-gray-500 block mb-1">{label}</label>
+<div className="flex items-center gap-1">
+<div className="flex-1 flex items-center gap-2 p-1 border border-gray-200 rounded-lg bg-gray-50 shadow-sm relative overflow-hidden focus-within:border-blue-400 transition-colors" onMouseLeave={onBlur}>
+<input type="color" value={value || '#000000'} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+<div className="w-4 h-4 rounded-full border border-gray-300 relative z-0" style={{ backgroundColor: value || '#000000' }}></div>
+<span className="text-[10px] font-mono text-gray-600 uppercase relative z-0">{value}</span>
+</div>
+{window.EyeDropper && (
+<button onClick={pickColor} className="p-1.5 bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 rounded-lg border border-gray-200 transition-colors" title="التقاط لون من الشاشة">
+<Icon name="Pipette" size={12} />
+</button>
+)}
+</div>
+</div>
+);
+};
+
+const SliderWithIdeal = ({ label, value, min, max, ideal, onChange, onDragEnd }) => {
+const idealPercent = ((ideal - min) / (max - min)) * 100;
+return (
+<div className="mb-4">
+<div className="flex justify-between text-[10px] text-gray-500 mb-3">
+<span>{label}</span><span className="font-bold text-blue-600">{value}px</span>
+</div>
+<div className="relative">
+<div className="absolute top-[-6px] w-0.5 h-[16px] bg-green-500 z-0 pointer-events-none" style={{ right: `${idealPercent}%` }} title={`الوضع المثالي: ${ideal}px`}>
+<div className="absolute -top-1 -right-[3px] w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-t-[4px] border-t-green-500"></div>
+</div>
+<input
+type="range" min={min} max={max} value={value}
+onChange={onChange} onMouseUp={onDragEnd} onTouchEnd={onDragEnd}
+className="w-full h-1.5 rounded-lg appearance-none cursor-pointer slider-track relative z-10 opacity-90 hover:opacity-100 transition-opacity"
+/>
+</div>
+</div>
+);
+};
+
+// ==================== FLOATING TEXT TOOLBAR ====================
+const FloatingToolbar = () => {
+const [position, setPosition] = useState({ top: 0, left: 0, show: false });
+
+useEffect(() => {
+const handleSelection = () => {
+const selection = window.getSelection();
+if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+let node = selection.anchorNode;
+let isEditable = false;
+while(node && node !== document.body) {
+if(node.getAttribute && node.getAttribute('contenteditable') === 'true') { isEditable = true; break; }
+node = node.parentNode;
+}
+if (isEditable) {
+const range = selection.getRangeAt(0);
+const rect = range.getBoundingClientRect();
+setPosition({ show: true, top: rect.top - 45, left: rect.left + (rect.width / 2) });
+} else {
+setPosition({ show: false, top: 0, left: 0 });
+}
+} else {
+setPosition({ show: false, top: 0, left: 0 });
+}
+};
+
+document.addEventListener('mouseup', handleSelection);
+document.addEventListener('keyup', handleSelection);
+return () => { document.removeEventListener('mouseup', handleSelection); document.removeEventListener('keyup', handleSelection); };
+}, []);
+
+if (!position.show) return null;
+
+const format = (cmd, value = null) => { document.execCommand(cmd, false, value); };
+
+return (
+<div className="fixed z-[100] flex items-center gap-1 bg-gray-900 text-white p-1 rounded-lg shadow-xl" style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }} onMouseDown={e => e.preventDefault()}>
+<button onClick={() => format('bold')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="عريض"><Icon name="Bold" size={14}/></button>
+<button onClick={() => format('italic')} className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="مائل"><Icon name="Italic" size={14}/></button>
+<div className="w-px h-4 bg-gray-700 mx-1"></div>
+<label className="p-1.5 hover:bg-gray-700 rounded cursor-pointer transition-colors relative" title="لون النص">
+<Icon name="Palette" size={14}/>
+<input type="color" onChange={(e) => format('foreColor', e.target.value)} className="absolute opacity-0 w-0 h-0" />
+</label>
+</div>
+);
+};
+
+// ==================== TOP TOOLBAR COMPONENT ====================
+const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus }) => {
+    const { state } = useContext(AppContext);
+    const { addToast } = useContext(ToastContext);
+    const fileInputRef = useRef(null);
+    
+    const handlePublish = () => {
+        addToast('جاري تحضير الموقع للنشر...', 'warning');
+        setTimeout(() => addToast('تم نشر الموقع بنجاح! الرابط جاهز للنسخ.', 'success'), 1500);
+    };
+
+    const handlePreview = () => {
+        addToast('جاري فتح المعاينة في نافذة جديدة...');
+    };
+
+    return (
+        <header className="glass-panel shadow-soft h-16 flex items-center justify-between px-6 border-b border-gray-200 fixed top-0 w-full z-[60]">
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-medium">
+                        <Icon name="Layers" size={22} className="text-white" />
+                    </div>
+                    <div>
+                        <h1 className="font-display text-lg font-bold text-gray-800 leading-tight">Store Builder Pro</h1>
+                        <div className="flex items-center gap-2">
+                            <span className={`w-1.5 h-1.5 rounded-full ${autoSaveStatus === 'saved' ? 'bg-green-500' : 'bg-yellow-500 animate-pulse-soft'}`}></span>
+                            <span className="text-[10px] text-gray-500">{autoSaveStatus === 'saved' ? 'تم الحفظ محلياً' : 'جاري الحفظ...'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-8 w-px bg-gray-200 mx-2"></div>
+                <div className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 flex items-center gap-2">
+                    <span className="text-sm font-medium text-blue-700 truncate max-w-[150px]">
+                        {state.pages.find(p => p.id === state.activePage)?.name || 'لا توجد صفحة'}
+                    </span>
+                </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                    <button onClick={onUndo} disabled={!canUndo} className={`p-2 rounded-lg transition-colors ${canUndo ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed opacity-50'}`} title="تراجع"><Icon name="Undo" size={18} /></button>
+                    <button onClick={onRedo} disabled={!canRedo} className={`p-2 rounded-lg transition-colors ${canRedo ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed opacity-50'}`} title="إعادة"><Icon name="Redo" size={18} /></button>
+                </div>
+                
+                <div className="h-8 w-px bg-gray-200"></div>
+
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-100">
+                    {[ { id: 'desktop', icon: 'Monitor' }, { id: 'tablet', icon: 'Tablet' }, { id: 'mobile', icon: 'Smartphone' }].map(v => (
+                        <button key={v.id} onClick={() => setViewport(v.id)} className={`p-2 rounded-lg transition-all ${viewport === v.id ? 'bg-white shadow-soft text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}><Icon name={v.icon} size={18} /></button>
+                    ))}
+                    <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                    <button onClick={onExport} className="p-2 text-gray-500 hover:text-blue-600 rounded-lg transition-colors" title="تصدير بصيغة JSON"><Icon name="Download" size={18} /></button>
+                    <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-500 hover:text-blue-600 rounded-lg transition-colors" title="استيراد تصميم"><Icon name="Upload" size={18} /></button>
+                    <input ref={fileInputRef} type="file" accept=".json" onChange={onImport} className="hidden" />
+                </div>
+                
+                <div className="h-8 w-px bg-gray-200 mx-1"></div>
+                
+                <div className="flex items-center gap-2">
+                    <button onClick={handlePreview} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium">
+                        <Icon name="Eye" size={16} /> معاينة
+                    </button>
+                    <button onClick={handlePublish} className="btn-primary flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold shadow-md hover:shadow-lg">
+                        <Icon name="Globe" size={16} /> نشر الموقع
+                    </button>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+// ==================== SIDEBAR COMPONENT (تم التعديل - المرحلة الأولى) ====================
+const Sidebar = () => {
+    const { state, dispatch } = useContext(AppContext);
+    const [activeTab, setActiveTab] = useState('widgets');
+    const [newPageName, setNewPageName] = useState('');
+    const [showNewPage, setShowNewPage] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    const handleDragStart = (e, widgetType) => {
+        e.dataTransfer.setData('widgetType', widgetType);
+        e.dataTransfer.effectAllowed = 'copy';
+        e.target.classList.add('dragging');
+    };
+    const handleDragEnd = (e) => { e.target.classList.remove('dragging'); };
+    
+    const addPage = (parentId = null) => {
+        if (newPageName.trim()) {
+            dispatch({ type: 'ADD_PAGE', payload: { id: generateId(), name: newPageName, slug: newPageName.toLowerCase().replace(/\s+/g, '-'), parentId: parentId, showTopBar: true, heroMode: 'standard', headerTransparency: 0, sections: [] } });
+            setNewPageName(''); setShowNewPage(false); dispatch({ type: 'SAVE_HISTORY' });
+        }
+    };
+    const deletePage = (pageId) => {
+        if (window.confirm('هل أنت متأكد من حذف هذه الصفحة نهائياً؟')) {
+            if (state.pages.length > 1) { dispatch({ type: 'DELETE_PAGE', payload: pageId }); dispatch({ type: 'SAVE_HISTORY' }); }
+        }
+    };
+
+    return (
+        <aside className={`absolute flex flex-col bg-white/95 backdrop-blur-xl border-gray-200 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-50 ${isExpanded ? 'w-80 h-full top-0 right-0 border-l shadow-medium rounded-none' : 'w-16 h-[500px] top-1/2 -translate-y-1/2 right-4 rounded-2xl border shadow-xl'}`}>
+            
+            {/* زر الطي والفرد - مظهر وتأثير حركة أكثر سلاسة */}
+            <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2 z-50 bg-white border border-gray-200 shadow-md rounded-full w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all duration-500 hover:scale-110"
+                title={isExpanded ? "طي القائمة" : "فرد القائمة"}
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-500 ${!isExpanded ? 'rotate-180' : ''}`}>
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+
+            {/* حاوية الأيقونات (التبويبات) */}
+            <div className={`flex transition-all duration-500 ${isExpanded ? 'flex-row border-b border-gray-200 w-full px-2 pt-2' : 'flex-col gap-3 items-center justify-center w-full pt-4'}`}>
+                {[ { id: 'widgets', name: 'العناصر', icon: 'Grid' }, { id: 'pages', name: 'الصفحات', icon: 'FileText' }, { id: 'header', name: 'الترويسة', icon: 'Header' }, { id: 'theme', name: 'الثيم', icon: 'Palette' } ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => { setActiveTab(tab.id); if (!isExpanded) setIsExpanded(true); }}
+                        title={tab.name}
+                        className={`flex flex-col items-center justify-center transition-all duration-300 ${
+                            isExpanded ? 'flex-1 py-3 gap-1.5' : 'w-11 h-11 rounded-xl shrink-0'
+                        } ${
+                            activeTab === tab.id
+                                ? (isExpanded ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' : 'text-blue-600 bg-blue-100 shadow-sm')
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        <Icon name={tab.icon} size={isExpanded ? 18 : 22} className="shrink-0" />
+                        <span className={`text-[11px] font-bold whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100 max-h-4' : 'opacity-0 max-h-0 overflow-hidden'}`}>{tab.name}</span>
+                    </button>
+                ))}
+            </div>
+            
+            {/* محتوى القائمة */}
+            <div className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin transition-opacity duration-300 ${isExpanded ? 'opacity-100 delay-150 p-4 w-80' : 'opacity-0 pointer-events-none absolute invisible w-0 h-0'}`}>
+                {activeTab === 'widgets' && (
+                    <div className="space-y-2">
+                        <p className="text-xs text-gray-500 mb-3 px-1">اسحب العناصر إلى منطقة العمل</p>
+                        {widgetTypes.map(widget => (
+                            <div key={widget.id} draggable onDragStart={(e) => handleDragStart(e, widget.id)} onDragEnd={handleDragEnd} className="widget-item flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 cursor-grab shadow-soft">
+                                <div className="p-2.5 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600"><Icon name={widget.icon} size={20} /></div>
+                                <div className="flex-1"><span className="text-sm font-semibold text-gray-800">{widget.name}</span><p className="text-xs text-gray-500">{widget.description}</p></div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {activeTab === 'pages' && (
+                    <div className="space-y-2">
+                        {state.pages.map(page => (
+                            <div key={page.id} className="relative">
+                                <div className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${state.activePage === page.id ? 'bg-gradient-to-l from-blue-500 to-blue-600 text-white shadow-medium' : 'bg-white border border-gray-200 hover:border-blue-300 shadow-soft'}`} style={{ marginRight: page.parentId ? '1.5rem' : '0' }} onClick={() => dispatch({ type: 'SET_ACTIVE_PAGE', payload: page.id })}>
+                                    <div className="flex items-center gap-3"><Icon name={page.parentId ? "Layers" : "FileText"} size={16} className={page.parentId ? "opacity-70" : ""} /><span className="text-sm font-medium">{page.name}</span></div>
+                                    <div className="flex gap-1 items-center">
+                                        {!page.parentId && (<button onClick={(e) => { e.stopPropagation(); setNewPageName(''); setShowNewPage({ isSub: true, parentId: page.id }); }} className={`p-1.5 rounded-lg transition-all ${state.activePage === page.id ? 'hover:bg-white/20' : 'hover:bg-blue-50 text-blue-500'}`} title="إضافة صفحة فرعية"><Icon name="Plus" size={14} /></button>)}
+                                        {state.pages.length > 1 && (<button onClick={(e) => { e.stopPropagation(); deletePage(page.id); }} className={`p-1.5 rounded-lg transition-all ${state.activePage === page.id ? 'hover:bg-white/20' : 'hover:bg-red-50 text-red-500'}`} title="حذف الصفحة"><Icon name="Trash" size={14} /></button>)}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {showNewPage ? (
+                            <div className="mt-3 p-3 rounded-xl bg-white border border-gray-200 shadow-soft animate-fade-scale" style={{ marginRight: showNewPage.isSub ? '1.5rem' : '0' }}>
+                                <p className="text-[10px] text-gray-500 mb-2">{showNewPage.isSub ? 'إضافة صفحة فرعية' : 'إضافة صفحة رئيسية جديدة'}</p>
+                                <input type="text" value={newPageName} onChange={(e) => setNewPageName(e.target.value)} placeholder="اسم الصفحة..." className="input-field w-full px-3 py-2 rounded-lg text-sm mb-3" autoFocus onKeyDown={(e) => { if (e.key === 'Enter') addPage(showNewPage.parentId); }} />
+                                <div className="flex gap-2">
+                                    <button onClick={() => addPage(showNewPage.parentId)} className="btn-primary flex-1 py-1.5 rounded-lg text-xs font-medium">حفظ</button>
+                                    <button onClick={() => { setShowNewPage(false); setNewPageName(''); }} className="flex-1 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">إلغاء</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button onClick={() => setShowNewPage({ isSub: false })} className="w-full flex items-center justify-center gap-2 p-3 mt-2 rounded-xl border-2 border-dashed border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all"><Icon name="Plus" size={16} /><span className="text-xs font-medium">صفحة رئيسية جديدة</span></button>
+                        )}
+                    </div>
+                )}
+                {activeTab === 'header' && <HeaderSettings />}
+                {activeTab === 'theme' && <ThemeSettings />}
+            </div>
+        </aside>
+    );
+};
+
+// ==================== HEADER SETTINGS COMPONENT ====================
+const HeaderSettings = () => {
+const { state, dispatch } = useContext(AppContext);
+const [draggedItemId, setDraggedItemId] = useState(null);
+const fileInputRef = useRef(null);
+const activePage = state.pages.find(p => p.id === state.activePage);
+const handleUpdateLive = (payload) => {
+dispatch({ type: 'UPDATE_HEADER', payload });
+};
+const saveHistory = () => {
+dispatch({ type: 'SAVE_HISTORY' });
+};
+const handleLogoUpload = async (e) => {
+const file = e.target.files[0];
+if (file) {
+const base64Url = await fileToBase64(file);
+handleUpdateLive({ logoImage: base64Url });
+saveHistory();
+}
+e.target.value = '';
+};
+const handleNavDragStart = (e, itemId) => { setDraggedItemId(itemId); e.dataTransfer.effectAllowed = 'move'; };
+const handleNavDragOver = (e, targetId) => {
+e.preventDefault();
+if (draggedItemId && draggedItemId !== targetId) {
+const currentOrder = [...state.headerSettings.navOrder];
+const draggedIndex = currentOrder.indexOf(draggedItemId);
+const targetIndex = currentOrder.indexOf(targetId);
+if (draggedIndex !== -1 && targetIndex !== -1) {
+currentOrder.splice(draggedIndex, 1);
+currentOrder.splice(targetIndex, 0, draggedItemId);
+handleUpdateLive({ navOrder: currentOrder });
+}
+}
+};
+const handleNavDragEnd = () => { setDraggedItemId(null); saveHistory(); };
+const toggleNavItem = (itemId, visible) => { dispatch({ type: 'UPDATE_NAV_ITEM', payload: { id: itemId, props: { visible: !visible } } }); saveHistory(); };
+const toggleSocialItem = (linkId, visible) => {
+const newLinks = state.headerSettings.socialLinks.map(l => l.id === linkId ? { ...l, visible: !visible } : l);
+handleUpdateLive({ socialLinks: newLinks });
+saveHistory();
+};
+const updateSocialUrl = (linkId, url) => {
+const newLinks = state.headerSettings.socialLinks.map(l => l.id === linkId ? { ...l, url } : l);
+handleUpdateLive({ socialLinks: newLinks });
+};
+return (
+<div className="space-y-4 pb-10">
+<div className="p-3 rounded-xl bg-white border border-gray-200 shadow-soft">
+<h4 className="font-semibold text-xs text-gray-800 mb-3">إعدادات عرض الصفحة</h4>
+<div className="space-y-3">
+<div className="flex items-center justify-between">
+<span className="text-xs text-gray-600">الشريط العلوي</span>
+<button onClick={() => { dispatch({ type: 'UPDATE_PAGE_SETTINGS', payload: { showTopBar: !activePage?.showTopBar } }); saveHistory(); }} className={`toggle-switch w-9 h-5 rounded-full relative ${activePage?.showTopBar ? 'active' : 'bg-gray-200'}`}><span className="toggle-dot absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-white shadow"></span></button>
+</div>
+<div className="space-y-1">
+<span className="text-xs text-gray-600">وضع البانر</span>
+<div className="grid grid-cols-2 gap-1">
+<button onClick={() => { dispatch({ type: 'UPDATE_PAGE_SETTINGS', payload: { heroMode: 'standard' } }); saveHistory(); }} className={`p-1.5 rounded-lg text-[10px] font-medium transition-all ${activePage?.heroMode === 'standard' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}>قياسي</button>
+<button onClick={() => { dispatch({ type: 'UPDATE_PAGE_SETTINGS', payload: { heroMode: 'immersive' } }); saveHistory(); }} className={`p-1.5 rounded-lg text-[10px] font-medium transition-all ${activePage?.heroMode === 'immersive' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}>شامل</button>
+</div>
+</div>
+<div className="space-y-1">
+<div className="flex items-center justify-between">
+<span className="text-[10px] text-gray-600">الشفافية</span>
+<span className="text-[10px] text-blue-600 font-medium">{activePage?.headerTransparency || 0}%</span>
+</div>
+<input type="range" min="0" max="100" value={activePage?.headerTransparency || 0} onChange={(e) => dispatch({ type: 'UPDATE_PAGE_SETTINGS', payload: { headerTransparency: parseInt(e.target.value) } })} onMouseUp={saveHistory} onTouchEnd={saveHistory} className="w-full h-1.5 rounded-lg appearance-none cursor-pointer slider-track" />
+</div>
+</div>
+</div>
+<div className="p-3 rounded-xl bg-white border border-gray-200 shadow-soft">
+<h4 className="font-semibold text-xs text-gray-800 mb-3">الشعار</h4>
+<div className="space-y-3">
+<div>
+<label className="text-xs text-gray-500 mb-1 block">رابط أو رفع صورة الشعار</label>
+<div className="flex gap-2 items-center w-full">
+<input type="text" value={state.headerSettings.logoImage} onChange={(e) => handleUpdateLive({ logoImage: e.target.value })} onBlur={saveHistory} className="input-field flex-1 min-w-0 px-3 py-2 rounded-lg text-sm" placeholder="https://..." />
+<button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 flex items-center justify-center shrink-0" title="رفع صورة الشعار مباشرة">
+<Icon name="Upload" size={16} />
+</button>
+<input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+</div>
+</div>
+<input type="text" value={state.headerSettings.logo} onChange={(e) => handleUpdateLive({ logo: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1 rounded-lg text-sm" placeholder="النص البديل للشعار" />
+<SliderWithIdeal label="حجم الشعار" value={state.headerSettings.logoSize} min={20} max={120} ideal={40} onChange={(e) => handleUpdateLive({ logoSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+<select value={state.headerSettings.logoShape} onChange={(e) => { handleUpdateLive({ logoShape: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1 rounded-lg text-[10px]">
+<option value="default">الشكل الافتراضي</option>
+<option value="circle">دائري</option>
+<option value="rounded">منحني الأطراف</option>
+<option value="triangle">مثلث</option>
+</select>
+</div>
+</div>
+<div className="p-3 rounded-xl bg-white border border-gray-200 shadow-soft">
+<h4 className="font-semibold text-xs text-gray-800 mb-3">الشريط العلوي و التواصل</h4>
+<div className="space-y-4">
+<input type="text" value={state.headerSettings.topBarText} onChange={(e) => handleUpdateLive({ topBarText: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs" placeholder="النص الترويجي" />
+<div className="space-y-2">
+<ColorPickerWithDropper label="لون خلفية الشريط" value={state.headerSettings.topBarBgColor} onChange={(val) => handleUpdateLive({ topBarBgColor: val })} onBlur={saveHistory} />
+<ColorPickerWithDropper label="لون النص الترويجي" value={state.headerSettings.topBarTextColor} onChange={(val) => handleUpdateLive({ topBarTextColor: val })} onBlur={saveHistory} />
+</div>
+<div className="pt-3 border-t border-gray-100">
+<label className="text-xs font-semibold text-gray-700 mb-2 block">وسائل التواصل الاجتماعي</label>
+<div className="grid grid-cols-2 gap-2 mb-3">
+<button onClick={() => { handleUpdateLive({ socialPosition: 'right' }); saveHistory(); }} className={`p-1.5 text-[10px] rounded transition-all ${state.headerSettings.socialPosition === 'right' ? 'bg-blue-500 text-white shadow' : 'bg-gray-100 text-gray-600'}`}>يمين الشريط</button>
+<button onClick={() => { handleUpdateLive({ socialPosition: 'left' }); saveHistory(); }} className={`p-1.5 text-[10px] rounded transition-all ${state.headerSettings.socialPosition === 'left' ? 'bg-blue-500 text-white shadow' : 'bg-gray-100 text-gray-600'}`}>يسار الشريط</button>
+</div>
+<div className="mb-4">
+<ColorPickerWithDropper label="لون الأيقونات" value={state.headerSettings.socialColor} onChange={(val) => handleUpdateLive({ socialColor: val })} onBlur={saveHistory} />
+</div>
+<SliderWithIdeal label="حجم أيقونات التواصل" value={state.headerSettings.socialIconSize || 15} min={10} max={30} ideal={15} onChange={(e) => handleUpdateLive({ socialIconSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+<div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+{state.headerSettings.socialLinks.map(link => (
+<div key={link.id} className="flex flex-col gap-1 p-1.5 bg-gray-50 rounded border border-gray-100 transition-colors hover:border-blue-200">
+<div className="flex items-center justify-between">
+<div className="flex items-center gap-1">
+<Icon name={link.icon} size={14} className="text-gray-500" />
+<span className="text-[9px] text-gray-700 font-medium">{link.name}</span>
+</div>
+<button onClick={() => toggleSocialItem(link.id, link.visible)} className={`p-0.5 rounded ${link.visible ? 'text-blue-600' : 'text-gray-400'}`}><Icon name={link.visible ? 'Eye' : 'EyeOff'} size={12} /></button>
+</div>
+{link.visible && <input type="url" value={link.url} onChange={(e) => updateSocialUrl(link.id, e.target.value)} onBlur={saveHistory} placeholder="رابط الحساب..." className="w-full px-1.5 py-0.5 text-[9px] rounded border border-gray-200 mt-1" />}
+</div>
+))}
+</div>
+</div>
+</div>
+</div>
+<div className="p-3 rounded-xl bg-white border border-gray-200 shadow-soft">
+<div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-3">
+<h4 className="font-semibold text-xs text-gray-800">شريط التنقل (Navigation Bar)</h4>
+</div>
+<div className="space-y-2 mb-4">
+<ColorPickerWithDropper label="لون خلفية الشريط" value={state.headerSettings.navBgColor} onChange={(val) => handleUpdateLive({ navBgColor: val })} onBlur={saveHistory} />
+<ColorPickerWithDropper label="لون النصوص والأيقونات" value={state.headerSettings.navTextColor} onChange={(val) => handleUpdateLive({ navTextColor: val, navIconColor: val })} onBlur={saveHistory} />
+</div>
+<SliderWithIdeal label="حجم أيقونات التنقل" value={state.headerSettings.navIconSize || 20} min={16} max={36} ideal={20} onChange={(e) => handleUpdateLive({ navIconSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+<p className="text-[10px] font-semibold text-gray-700 mb-2 border-t pt-2">ترتيب العناصر (اسحب بحرية)</p>
+<div className="space-y-1.5">
+{state.headerSettings.navOrder.map(itemId => {
+const item = state.headerSettings.navItems.find(i => i.id === itemId);
+if (!item) return null;
+let iconName = 'Globe';
+if(item.type === 'menu') iconName = 'Menu';
+if(item.type === 'search') iconName = 'Search';
+if(item.type === 'logo') iconName = 'Layers';
+if(item.type === 'cart') iconName = 'ShoppingCart';
+return (
+<div key={item.id} draggable onDragStart={(e) => handleNavDragStart(e, item.id)} onDragOver={(e) => handleNavDragOver(e, item.id)} onDragEnd={handleNavDragEnd} className={`nav-item-drag flex items-center justify-between p-1.5 rounded border border-gray-100 bg-white shadow-sm hover:border-blue-300 ${draggedItemId === item.id ? 'opacity-50 scale-95' : ''}`}>
+<div className="flex items-center gap-1.5">
+<Icon name="GripVertical" size={12} className="text-gray-300 cursor-grab" />
+<div className="w-5 h-5 bg-gray-50 flex items-center justify-center rounded"><Icon name={iconName} size={12} className="text-gray-600" /></div>
+<span className="text-[10px] font-medium text-gray-700">{item.label}</span>
+</div>
+<button onClick={() => toggleNavItem(item.id, item.visible)} className={`p-1 rounded transition-colors ${item.visible ? 'text-blue-600 bg-blue-50' : 'text-gray-400 bg-gray-50'}`}><Icon name={item.visible ? 'Eye' : 'EyeOff'} size={12} /></button>
+</div>
+);
+})}
+</div>
+</div>
+</div>
+);
+};
+
+// ==================== THEME SETTINGS COMPONENT ====================
+const ThemeSettings = () => {
+    const { state, dispatch } = useContext(AppContext);
+    
+    const handleSaveCustomTheme = () => {
+        const themeName = prompt('أدخل اسماً للثيم الجديد:');
+        if (themeName) {
+            dispatch({ type: 'SAVE_CUSTOM_THEME', payload: { name: themeName, primary: state.themeColors.primary, secondary: state.themeColors.secondary, accent: state.themeColors.accent } });
+            dispatch({ type: 'SAVE_HISTORY' });
+        }
+    };
+
+    return (
+        <div className="space-y-3 p-2">
+            <div className="p-3 rounded-lg bg-white border border-gray-200 shadow-soft">
+                <h4 className="font-semibold text-xs text-gray-800 mb-3 border-b pb-2">الخط التلقائي للموقع</h4>
+                <select value={state.themeColors.fontFamily || 'Cairo'} onChange={(e) => { dispatch({ type: 'UPDATE_THEME', payload: { fontFamily: e.target.value } }); dispatch({ type: 'SAVE_HISTORY' }); }} className="input-field w-full px-2 py-2 rounded-lg text-xs font-bold">
+                    <option value="Cairo">Cairo (كايرو)</option>
+                    <option value="Tajawal">Tajawal (تجاول)</option>
+                    <option value="Almarai">Almarai (المراعي)</option>
+                    <option value="'Plus Jakarta Sans'">Jakarta (انجليزي)</option>
+                </select>
+            </div>
+
+            <div className="p-3 rounded-lg bg-white border border-gray-200 shadow-soft">
+                <h4 className="font-semibold text-xs text-gray-800 mb-3 border-b pb-2">ألوان العلامة التجارية</h4>
+                <div className="space-y-2">
+                    <ColorPickerWithDropper label="الأساسي" value={state.themeColors.primary} onChange={(val) => dispatch({ type: 'UPDATE_THEME', payload: { primary: val } })} onBlur={() => dispatch({ type: 'SAVE_HISTORY' })} />
+                    <ColorPickerWithDropper label="الثانوي" value={state.themeColors.secondary} onChange={(val) => dispatch({ type: 'UPDATE_THEME', payload: { secondary: val } })} onBlur={() => dispatch({ type: 'SAVE_HISTORY' })} />
+                    <ColorPickerWithDropper label="التمييز (Accent)" value={state.themeColors.accent} onChange={(val) => dispatch({ type: 'UPDATE_THEME', payload: { accent: val } })} onBlur={() => dispatch({ type: 'SAVE_HISTORY' })} />
+                </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-white border border-gray-200 shadow-soft">
+                <div className="flex items-center justify-between mb-3 border-b pb-2">
+                    <h4 className="font-semibold text-xs text-gray-800">ثيمات جاهزة</h4>
+                    <button onClick={handleSaveCustomTheme} className="text-[10px] text-blue-600 font-bold hover:underline">+ حفظ ثيم مخصص</button>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin">
+                    {[ 
+                        { name: 'أزرق', primary: '#3b82f6', secondary: '#1e40af', accent: '#f59e0b' }, 
+                        { name: 'أخضر', primary: '#10b981', secondary: '#047857', accent: '#8b5cf6' }, 
+                        { name: 'بنفسجي', primary: '#8b5cf6', secondary: '#6d28d9', accent: '#f43f5e' }, 
+                        { name: 'برتقالي', primary: '#f97316', secondary: '#c2410c', accent: '#0ea5e9' },
+                        ...(state.savedThemes || [])
+                    ].map((preset, idx) => (
+                        <button key={idx} onClick={() => { dispatch({ type: 'UPDATE_THEME', payload: { primary: preset.primary, secondary: preset.secondary, accent: preset.accent } }); dispatch({ type: 'SAVE_HISTORY' }); }} className="p-1.5 rounded bg-gray-50 border text-[10px] font-medium hover:border-blue-300 transition-colors text-right flex items-center gap-1.5">
+                            <div className="flex -space-x-1 space-x-reverse">
+                                <span className="w-2.5 h-2.5 rounded-full border border-white" style={{ backgroundColor: preset.primary }}></span>
+                                <span className="w-2.5 h-2.5 rounded-full border border-white" style={{ backgroundColor: preset.secondary }}></span>
+                            </div>
+                            <span className="truncate">{preset.name}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-white border border-gray-200 shadow-soft">
+                <h4 className="font-semibold text-xs text-gray-800 mb-3 border-b pb-2">تأثيرات التفاعل</h4>
+                <SliderWithIdeal label="تكبير البطاقة" value={state.hoverEffects.productCardScale} min={1} max={1.1} ideal={1.02} onChange={(e) => dispatch({ type: 'UPDATE_HOVER_EFFECTS', payload: { productCardScale: parseFloat(e.target.value) } })} onDragEnd={() => dispatch({ type: 'SAVE_HISTORY' })} />
+                <SliderWithIdeal label="تكبير صورة المنتج" value={state.hoverEffects.productImageScale} min={1} max={1.2} ideal={1.08} onChange={(e) => dispatch({ type: 'UPDATE_HOVER_EFFECTS', payload: { productImageScale: parseFloat(e.target.value) } })} onDragEnd={() => dispatch({ type: 'SAVE_HISTORY' })} />
+            </div>
+        </div>
+    );
+};
+
+/* ===== نهاية المرحلة الأولى - قم بنسخ الكود أعلاه وألصقه في الملف، ثم انتقل للمرحلة الثانية =====*/
+
+
+// ==================== HERO SECTION COMPONENT المطور بحرية كاملة ====================
+const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
+    const {
+        title, subtitle, buttonText, showButton = true, overlay, textColor,
+        mediaType = 'image', mediaUrls = ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'],
+        contentAlign = 'center', contentPosition = 'center', bannerHeight = 'md',
+        titleSize = 48, subtitleSize = 18, titleGutter = 16, subtitleGutter = 32,
+        btnColor = '#ffffff', btnTextColor = '#1e293b', btnFontSize = 16, btnPaddingX = 32, btnPaddingY = 14
+    } = section.props || {};
+    
+    const [currentSlide, setCurrentSlide] = useState(0);
+    useEffect(() => {
+        if (mediaType === 'slider' && mediaUrls && mediaUrls.length > 1) {
+            const timer = setInterval(() => {
+                setCurrentSlide(prev => (prev + 1) % mediaUrls.length);
+            }, 3500);
+            return () => clearInterval(timer);
+        }
+    }, [mediaType, mediaUrls]);
+
+    const alignClasses = { right: 'items-start text-right', center: 'items-center text-center', left: 'items-end text-left' };
+    const positionClasses = { top: 'justify-start pt-24', center: 'justify-center', bottom: 'justify-end pb-24' };
+    const heightClasses = { sm: 'min-h-[300px]', md: 'min-h-[500px]', lg: 'min-h-[700px]', full: 'min-h-screen' };
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`relative w-full ${heightClasses[bannerHeight]} overflow-hidden transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            {mediaType === 'video' ? (
+                <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
+                    <source src={mediaUrls[0]} type="video/mp4" />
+                </video>
+            ) : mediaType === 'slider' ? (
+                mediaUrls.map((url, i) => (
+                    <div key={i} className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000" style={{ backgroundImage: `url(${url})`, opacity: i === currentSlide ? 1 : 0 }}></div>
+                ))
+            ) : (
+                <div className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url(${mediaUrls[0] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'})` }}></div>
+            )}
+            <div className="absolute inset-0 bg-black pointer-events-none" style={{ opacity: (overlay !== undefined ? overlay : 40) / 100 }}></div>
+            <div className={`relative z-10 flex flex-col h-full w-full ${heightClasses[bannerHeight]} px-8 md:px-16 ${positionClasses[contentPosition]} ${alignClasses[contentAlign]}`}>
+                <h1
+                    data-placeholder="عنوان البانر الرئيسي"
+                    contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })}
+                    className="font-bold max-w-4xl font-display leading-tight"
+                    style={{ color: textColor, fontSize: `${titleSize}px`, marginBottom: `${titleGutter}px` }}
+                >
+                    {title !== undefined ? title : 'اكتشف أفضل المنتجات'}
+                </h1>
+                <p
+                    data-placeholder="أضف وصفاً جذاباً لمنتجك أو خدمتك هنا..."
+                    contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { subtitle: e.target.innerText })}
+                    className="max-w-2xl leading-relaxed"
+                    style={{ color: textColor, fontSize: `${subtitleSize}px`, marginBottom: `${subtitleGutter}px` }}
+                >
+                    {subtitle !== undefined ? subtitle : 'تسوق الآن واحصل على خصم 30% على طلبك الأول'}
+                </p>
+                {showButton !== false && (
+                    <button 
+                        className="rounded-xl font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center" 
+                        style={{ 
+                            backgroundColor: btnColor, 
+                            color: btnTextColor, 
+                            fontSize: `${btnFontSize}px`, 
+                            paddingLeft: `${btnPaddingX}px`, 
+                            paddingRight: `${btnPaddingX}px`, 
+                            paddingTop: `${btnPaddingY}px`, 
+                            paddingBottom: `${btnPaddingY}px` 
+                        }}
+                    >
+                        <span data-placeholder="نص الزر" contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText !== undefined ? buttonText : 'تسوق الآن'}</span>
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+
+// ==================== PRODUCTS SECTION COMPONENT (محدث ومطور) ====================
+const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
+    const { 
+        title, listType = 'dynamic', productIds,
+        columns, columnsTablet, columnsMobile, 
+        cardStyle = 'style1', 
+        mainCategory = 'الكل', enableSub = false, subCategory = 'الكل',
+        activeFilters = [], showAddToCart = true, showFilters = true, showRating = true
+    } = section.props || {};
+
+    const [activeFilter, setActiveFilter] = useState('الكل');
+
+    const getColumns = () => { 
+        if (viewport === 'mobile') return columnsMobile || 2; 
+        if (viewport === 'tablet') return columnsTablet || 3; 
+        return columns || 4; 
+    };
+
+    const allProducts = [
+        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين', price: '60.00', oldPrice: '75.00', category: 'ملابس', subCategory: 'تيشيرتات', brand: 'زارا', color: 'رمادي', size: 'M', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
+        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف خامات ممتازة', price: '45.00', oldPrice: null, category: 'أحذية', subCategory: 'رياضية', brand: 'نايك', color: 'أبيض', size: '42', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
+        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة سير جلد طبيعي', price: '50.00', oldPrice: '60.00', category: 'ساعات', subCategory: 'ساعات جلد', brand: 'كاسيو', color: 'أسود', size: 'موحد', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
+        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري راقٍ', price: '50.00', oldPrice: '60.00', category: 'ملابس', subCategory: 'فساتين', brand: 'مانجو', color: 'بيج', size: 'L', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
+    ];
+
+    const categories = ['الكل', ...new Set(allProducts.map(p => p.category))];
+    const [selectedFilters, setSelectedFilters] = useState({});
+
+    let displayedProducts = allProducts;
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-3 md:p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            <div className="max-w-7xl mx-auto py-4">
+                <div className="flex flex-col items-center mb-6">
+                    <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان قسم المنتجات" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-xl md:text-3xl font-bold font-display text-gray-800 mb-4 text-center">
+                        {title !== undefined ? title : 'منتجاتنا المميزة'}
+                    </h3>
+                </div>
+
+                {/* شبكة المنتجات المستجيبة - مصممة خصيصاً للهواتف لتعرض بطاقتين بذكاء وأناقة */}
+                <div className="grid gap-3 md:gap-6" style={{ gridTemplateColumns: `repeat(${getColumns()}, minmax(0, 1fr))` }}>
+                    {displayedProducts.map(product => {
+                        // حساب نسبة الخصم تلقائياً إن وجد سعر قديم
+                        const hasDiscount = product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price);
+                        const discountPercent = hasDiscount ? Math.round(((parseFloat(product.oldPrice) - parseFloat(product.price)) / parseFloat(product.oldPrice)) * 100) : 0;
+
+                        return (
+                            <div key={product.id} className="product-card group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-soft flex flex-col h-full relative transition-all duration-300">
+                                
+                                {/* شارة الخصم الذكية المنحنية */}
+                                {hasDiscount && (
+                                    <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm select-none">
+                                        {discountPercent}%-
+                                    </div>
+                                )}
+
+                                {cardStyle === 'style2' && (
+                                    <div className="flex items-center justify-between p-2.5 border-b border-gray-50 bg-gray-50/50">
+                                        <span className="font-bold text-blue-700 text-xs truncate max-w-[70%]">{product.company}</span>
+                                        <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm text-xs border border-gray-100 shrink-0">{product.logo}</div>
+                                    </div>
+                                )}
+
+                                {/* حاوية الصورة المطورة: تظهر الصورة الطبيعية مصغرة ومحاطة بهامش داخلي لمنع القص */}
+                                <div className="w-full aspect-[4/4] p-3 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
+                                    <img 
+                                        src={product.image} 
+                                        alt={product.name} 
+                                        className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" 
+                                    />
+                                </div>
+                                
+                                {/* تفاصيل المنتج مرتبة باحترافية للموبايل والديسكتوب */}
+                                <div className="p-3 md:p-4 flex flex-col flex-1 text-center bg-white">
+                                    <h4 className="text-gray-700 font-semibold mb-1.5 text-xs md:text-sm leading-tight line-clamp-2 h-8 md:h-10 text-right md:text-center">
+                                        {product.name}
+                                    </h4>
+                                    
+                                    <div className="mt-auto">
+                                        {showRating !== false && (
+                                            <div className="flex gap-0.5 mb-2 justify-start md:justify-center">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Icon key={i} name="Star" size={11} className={i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"} />
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* منطقة عرض السعر والعملة بطريقة هندسية متناسقة */}
+                                        <div className="flex items-center justify-start md:justify-center gap-1.5 mb-3" dir="rtl">
+                                            <span className="font-extrabold text-sm md:text-base text-gray-900">
+                                                {product.price} <span className="text-[10px] md:text-xs font-normal text-gray-500">ر.س</span>
+                                            </span>
+                                            {hasDiscount && (
+                                                <span className="text-[11px] md:text-xs text-gray-400 line-through decoration-gray-400">
+                                                    {product.oldPrice} ر.س
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {showAddToCart !== false && (
+                                            <button className="w-full py-2 rounded-2xl text-xs font-bold text-[#1e293b] bg-orange-100 hover:bg-orange-200/80 transition-all duration-200 flex items-center justify-center gap-1.5 border border-orange-200/40 shadow-sm active:scale-95">
+                                                <Icon name="ShoppingCart" size={13} className="text-[#1e293b]" />
+                                                إضافة إلى السلة
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ==================== CATEGORIES, BANNER, FEATURES, NEWSLETTER, FOOTER SECTIONS ====================
+// (تم اختصارها للتركيز على التعديلات الرئيسية، ولكنها موجودة في الكود الكامل)
+const CategoriesSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
+    const { title = 'تصفح الفئات', columns = 4, overlayOpacity = 40, overlayColor = '#000000', contentAlign = 'center', contentPosition = 'bottom', showCardButton = false, cardButtonBg = '#ffffff', cardButtonText = '#1e293b', categories = [
+        { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', buttonText: 'تسوق', link: '#', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' },
+        { id: 'c2', name: 'أزياء', subtitle: '243 منتج', buttonText: 'تسوق', link: '#', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' },
+        { id: 'c3', name: 'أجهزة منزلية', subtitle: '89 منتج', buttonText: 'تسوق', link: '#', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80' },
+        { id: 'c4', name: 'رياضة', subtitle: '67 منتج', buttonText: 'تسوق', link: '#', image: 'https://images.unsplash.com/photo-1461896836934-1543358e6d74?w=400&q=80' }
+    ] } = section.props || {};
+    const getCols = () => viewport === 'mobile' ? (section.props.columnsMobile || 2) : viewport === 'tablet' ? (section.props.columnsTablet || 3) : (columns || 4);
+    const alignClasses = { right: 'items-start text-right', center: 'items-center text-center', left: 'items-end text-left' };
+    const positionClasses = { top: 'justify-start pt-6 pb-4', center: 'justify-center py-4', bottom: 'justify-end pt-4 pb-6' };
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            <div className="max-w-7xl mx-auto py-8">
+                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان قسم الفئات" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold font-display text-gray-800 mb-8 text-center">{title}</h3>
+                <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: `repeat(${getCols()}, minmax(0, 1fr))` }}>
+                    {categories.map((cat, i) => (
+                        <div key={cat.id || i} className="relative group overflow-hidden rounded-2xl aspect-[4/5] md:aspect-[4/3] shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
+                            <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 transition-opacity duration-300" style={{ backgroundColor: overlayColor, opacity: overlayOpacity / 100 }}></div>
+                            <div className={`absolute inset-0 p-5 flex flex-col z-10 ${positionClasses[contentPosition]} ${alignClasses[contentAlign]}`}>
+                                <h4 className="font-bold text-white text-xl drop-shadow-md leading-tight mb-1">{cat.name}</h4>
+                                {cat.subtitle && <p className="text-white/90 text-sm font-medium drop-shadow-md">{cat.subtitle}</p>}
+                                {showCardButton && <button className="mt-4 px-5 py-2 rounded-xl text-xs font-bold transition-transform hover:-translate-y-1 shadow-lg" style={{ backgroundColor: cardButtonBg, color: cardButtonText }}>{cat.buttonText || 'تصفح'}</button>}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BannerSection = ({ section, isSelected, onSelect, onUpdate }) => {
+    const { title, description, bgColor = '#3b82f6', bgImage, overlayOpacity = 40, bannerHeight = 'md', textColor = '#ffffff', titleSize = 32, showButton = true, buttonText, btnColor = '#ffffff', btnTextColor = '#1e293b', contentAlign = 'center', contentPosition = 'center', showText = true, images = [] } = section.props || {};
+    const heightClasses = { sm: 'min-h-[200px]', md: 'min-h-[350px]', lg: 'min-h-[500px]' };
+    const alignClasses = { right: 'text-right items-start', center: 'text-center items-center', left: 'text-left items-end' };
+    const justifyClasses = { top: 'justify-start', center: 'justify-center', bottom: 'justify-end' };
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            <div className={`relative rounded-3xl overflow-hidden shadow-medium w-full flex flex-col transition-all duration-300 ${heightClasses[bannerHeight]}`} style={{ backgroundColor: bgColor }}>
+                {bgImage && <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: `url(${bgImage})` }}></div>}
+                <div className="absolute inset-0 bg-black pointer-events-none transition-opacity" style={{ opacity: overlayOpacity / 100 }}></div>
+                <div className={`relative z-10 w-full h-full flex flex-col gap-8 p-8 md:p-12 ${justifyClasses[contentPosition]}`}>
+                    <div className={`flex flex-col flex-1 ${alignClasses[contentAlign]} justify-center`}>
+                        {showText !== false && (
+                            <>
+                                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان البانر" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="font-bold mb-3 font-display leading-tight drop-shadow-md" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title !== undefined ? title : 'عرض خاص'}</h3>
+                                <p contentEditable suppressContentEditableWarning data-placeholder="وصف البانر" onBlur={(e) => onUpdate(section.id, { description: e.target.innerText })} className="mb-6 max-w-xl text-lg drop-shadow-sm" style={{ color: textColor, opacity: 0.9 }}>{description !== undefined ? description : 'احصل على خصم 50% على جميع المنتجات'}</p>
+                            </>
+                        )}
+                        {showButton !== false && (
+                            <button className="px-8 py-3.5 rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg border border-white/20 hover:shadow-xl" style={{ backgroundColor: btnColor, color: btnTextColor }}>
+                                <span data-placeholder="نص الزر" contentEditable suppressContentEditableWarning onBlur={(e) => onUpdate(section.id, { buttonText: e.target.innerText })}>{buttonText || 'تسوق الآن'}</span>
+                            </button>
+                        )}
+                    </div>
+                    {images && images.length > 0 && (
+                        <div className={`flex flex-wrap items-center gap-4 flex-1 ${alignClasses[contentAlign]} ${contentAlign === 'center' ? 'justify-center' : ''}`}>
+                            {images.map((img, i) => (
+                                <img key={i} src={img} alt="Promo" className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl shadow-xl border-2 border-white/20 hover:scale-110 hover:-rotate-2 transition-transform duration-300" />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const FeaturesSection = ({ section, isSelected, onSelect, onUpdate }) => {
+    const { title = 'لماذا نحن؟', features = [
+        { id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات المضمونة' },
+        { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' },
+        { id: 'f3', icon: 'Shield', title: 'دفع آمن', desc: 'حماية كاملة لبياناتك' }
+    ] } = section.props || {};
+    
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
+            <div className="max-w-6xl mx-auto">
+                <h3 contentEditable suppressContentEditableWarning data-placeholder="عنوان القسم" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl font-bold mb-10 font-display text-center text-gray-800">{title}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {features.map((f) => (
+                        <div key={f.id} className="text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-soft hover:shadow-medium transition-all group">
+                            <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 transition-transform group-hover:scale-110">
+                                <Icon name={f.icon || 'Star'} size={26} />
+                            </div>
+                            <h4 className="font-bold text-gray-800 mb-2">{f.title}</h4>
+                            <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const NewsletterSection = ({ section, isSelected, onSelect, onUpdate }) => {
+    const { title = 'اشترك في نشرتنا البريدية', subtitle = 'احصل على أحدث العروض والخصومات', bgColor = '#f8fafc', textColor = '#1e293b' } = section.props || {};
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-16 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
+            <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600"><Icon name="Mail" size={28} /></div>
+                <h3 contentEditable suppressContentEditableWarning data-placeholder="العنوان" onBlur={(e) => onUpdate(section.id, { title: e.target.innerText })} className="text-2xl md:text-3xl font-bold mb-3 font-display">{title}</h3>
+                <p contentEditable suppressContentEditableWarning data-placeholder="الوصف" onBlur={(e) => onUpdate(section.id, { subtitle: e.target.innerText })} className="mb-8 opacity-80">{subtitle}</p>
+                <div className="flex gap-2 max-w-md mx-auto bg-white p-1.5 rounded-xl shadow-sm border border-gray-200">
+                    <input type="email" placeholder="بريدك الإلكتروني..." className="flex-1 px-4 py-2 outline-none bg-transparent text-gray-800 text-sm" disabled />
+                    <button className="px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90" style={{ backgroundColor: 'var(--accent, #3b82f6)' }}>اشتراك</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const FooterSection = ({ section, isSelected, onSelect }) => {
+    const { state } = useContext(AppContext);
+    const { bgColor = '#1e293b', textColor = '#f8fafc' } = section.props || {};
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`py-12 px-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`} style={{ backgroundColor: bgColor, color: textColor }}>
+            <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row gap-10 mb-10 justify-between">
+                    <div className="flex-1">
+                        {state.headerSettings.logoImage ? <img src={state.headerSettings.logoImage} alt="Logo" className="h-10 mb-4 brightness-0 invert" /> : <h4 className="font-bold text-xl mb-4 font-display">{state.headerSettings.logo}</h4>}
+                        <p className="text-sm leading-relaxed opacity-80">وجهتك الأولى للتسوق الإلكتروني بأفضل الأسعار وأعلى جودة.</p>
+                    </div>
+                    <div className="flex gap-10">
+                         <div>
+                            <h4 className="font-bold text-lg mb-4">روابط هامة</h4>
+                            <ul className="space-y-2 text-sm opacity-80">
+                                <li className="hover:opacity-100 cursor-pointer">الرئيسية</li>
+                                <li className="hover:opacity-100 cursor-pointer">المنتجات</li>
+                                <li className="hover:opacity-100 cursor-pointer">من نحن</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-lg mb-4">تواصل معنا</h4>
+                            <div className="flex gap-3 items-center">
+                                {state.headerSettings.socialLinks.filter(l => l.visible && l.url).map(link => (
+                                    <a key={link.id} href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all text-white"><Icon name={link.icon} size={14} /></a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="pt-6 border-t border-white/10 text-center text-sm opacity-60">جميع الحقوق محفوظة {new Date().getFullYear()}</div>
+            </div>
+        </div>
+    );
+};
+
+
+// ==================== DRAGGABLE SECTION LIST ====================
+const SectionList = ({ sections, selectedSection, onSelect, onUpdate, onReorder, viewport }) => {
+    const [draggedId, setDraggedId] = useState(null);
+    const [dragOverId, setDragOverId] = useState(null);
+    
+    const handleDragStart = (e, id) => {
+        e.stopPropagation();
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('reorderSectionId', id);
+        setTimeout(() => setDraggedId(id), 0);
+    };
+    
+    const handleDragOver = (e, id) => { 
+        e.preventDefault(); 
+        e.stopPropagation();
+        if (draggedId !== id) setDragOverId(id);
+    };
+    
+    const handleDragLeave = () => setDragOverId(null);
+    
+    const handleDrop = (e, targetId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverId(null);
+        
+        const sourceId = e.dataTransfer.getData('reorderSectionId');
+        if (sourceId && sourceId !== targetId) { 
+            onReorder(sourceId, targetId); 
+        }
+        setDraggedId(null);
+    };
+    
+    const handleDragEnd = () => { 
+        setDraggedId(null); 
+        setDragOverId(null); 
+    };
+    
+    return (
+        <div className="flex flex-col w-full pb-20">
+            {sections.map((section) => (
+                <div
+                    key={section.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, section.id)}
+                    onDragOver={(e) => handleDragOver(e, section.id)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, section.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`relative group transition-all duration-300 ease-in-out
+                        ${draggedId === section.id ? 'opacity-40 scale-[0.98]' : 'opacity-100'} 
+                        ${dragOverId === section.id ? 'border-t-4 border-blue-500 rounded-t-xl mt-2' : 'border-t-0 mt-0'}
+                    `}
+                >
+                    <div className={`absolute top-4 left-4 z-50 flex flex-col bg-white shadow-md border border-gray-200 rounded-lg overflow-hidden transition-all ${selectedSection === section.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        <div className="p-2 cursor-grab active:cursor-grabbing hover:bg-gray-50 flex items-center justify-center" title="اسحب من هنا لتغيير الترتيب">
+                            <Icon name="GripVertical" size={14} className="text-gray-400" />
+                        </div>
+                        <div className="w-full h-px bg-gray-100"></div>
+                        <button onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className="p-2 hover:bg-blue-50 flex items-center justify-center text-blue-500" title="فتح الإعدادات">
+                            <Icon name="Settings" size={14} />
+                        </button>
+                    </div>
+                    
+                    {draggedId && <div className="absolute inset-0 z-40"></div>}
+                    
+                    {renderSection(section, selectedSection === section.id, onSelect, onUpdate, viewport)}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const renderSection = (section, isSelected, onSelect, onUpdate, viewport) => {
+const props = { section, isSelected, onSelect, onUpdate, viewport, key: section.id };
+switch (section.type) {
+case 'hero': return <HeroSection {...props} />;
+case 'products': return <ProductsSection {...props} />;
+case 'categories': return <CategoriesSection {...props} />;
+case 'banner': return <BannerSection {...props} />;
+case 'features': return <FeaturesSection {...props} />;
+case 'newsletter': return <NewsletterSection {...props} />;
+case 'footer': return <FooterSection {...props} />;
+default: return <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-6 bg-white ${isSelected ? 'section-selected' : ''}`}><h3 className="text-xl font-bold">{section.type}</h3></div>;
+}
+};
+
+// ==================== SETTINGS PANEL COMPONENT (معدل) ====================
+const SettingsPanel = ({ viewport }) => {
+const { state, dispatch } = useContext(AppContext);
+const { addToast } = useContext(ToastContext);
+
+const activePage = state.pages.find(p => p.id === state.activePage);
+const selectedSection = activePage?.sections.find(s => s.id === state.selectedSection);
+
+if (!selectedSection) return null;
+
+const handleUpdateLive = (props) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props } }); };
+const saveHistory = () => dispatch({ type: 'SAVE_HISTORY' });
+const handleUpdate = (props) => { handleUpdateLive(props); saveHistory(); };
+
+const handleDelete = () => {
+    if(window.confirm('هل أنت متأكد من حذف هذا القسم نهائياً؟')) {
+        dispatch({ type: 'DELETE_SECTION', payload: selectedSection.id });
+        dispatch({ type: 'SAVE_HISTORY' });
+        addToast('تم حذف القسم', 'success');
+    }
+};
+
+const renderSettings = () => {
+switch (selectedSection.type) {
+case 'hero':
+                const heroProps = selectedSection.props;
+                const handleHeroUpload = async (e) => {
+                    const files = Array.from(e.target.files);
+                    if (files.length > 0) {
+                        const newUrls = await Promise.all(files.map(f => fileToBase64(f)));
+                        const currentUrls = heroProps.mediaUrls || [];
+                        handleUpdate({
+                            mediaUrls: heroProps.mediaType === 'slider' ? [...currentUrls, ...newUrls] : [newUrls[0]]
+                        });
+                    }
+                    e.target.value = '';
+                };
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <div className="flex items-center justify-between border-b pb-1 mb-2">
+                                <h5 className="text-[11px] font-bold text-gray-700">الخلفية والأبعاد</h5>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="text-[10px] text-gray-500 mb-1 block">ارتفاع البانر</label>
+                                    <select value={heroProps.bannerHeight || 'md'} onChange={(e) => handleUpdate({ bannerHeight: e.target.value })} className="input-field w-full px-2 py-1.5 rounded-lg text-xs">
+                                        <option value="sm">صغير</option>
+                                        <option value="md">متوسط</option>
+                                        <option value="lg">كبير</option>
+                                        <option value="full">ملء الشاشة</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-gray-500 mb-1 block">نوع الخلفية</label>
+                                    <select value={heroProps.mediaType || 'image'} onChange={(e) => handleUpdate({ mediaType: e.target.value, mediaUrls: [] })} className="input-field w-full px-2 py-1.5 rounded-lg text-xs">
+                                        <option value="image">صورة ثابتة</option>
+                                        <option value="video">فيديو</option>
+                                        <option value="slider">صور متعددة (Slider)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-gray-500 mb-1 block">الرابط المباشر للوسائط</label>
+                                <div className="flex gap-1">
+                                    <input type="text" value={heroProps.mediaUrls?.join(', ') || ''} onChange={(e) => handleUpdateLive({ mediaUrls: e.target.value.split(',').map(s=>s.trim()) })} onBlur={saveHistory} className="input-field flex-1 px-2 py-1.5 rounded-lg text-[10px]" placeholder="https://..." />
+                                    <button type="button" onClick={() => document.getElementById('hero-upload').click()} className="px-2 bg-white border border-gray-200 rounded-lg text-blue-600 hover:bg-blue-50 shrink-0">
+                                        <Icon name="Upload" size={14} />
+                                    </button>
+                                    <input id="hero-upload" type="file" multiple={heroProps.mediaType === 'slider'} accept={heroProps.mediaType === 'video' ? 'video/mp4' : 'image/*'} onChange={handleHeroUpload} className="hidden" />
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex items-center justify-between"><label className="text-[10px] text-gray-500">طبقة التظليل</label><span className="text-[10px] text-blue-600">{heroProps.overlay || 40}%</span></div>
+                                <input type="range" min="0" max="90" value={heroProps.overlay || 40} onChange={(e) => handleUpdateLive({ overlay: parseInt(e.target.value) })} onMouseUp={saveHistory} onTouchEnd={saveHistory} className="w-full h-1.5 rounded-lg appearance-none slider-track mt-1" />
+                            </div>
+                        </div>
+
+                        {/* تحكم حر ومتقدم في النصوص والمسافات */}
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1">التحكم الحر في النصوص والمواقع</h5>
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                <div>
+                                    <label className="text-[10px] text-gray-500 mb-1 block">محاذاة النص أفقياً</label>
+                                    <select value={heroProps.contentAlign || 'center'} onChange={(e) => { handleUpdateLive({ contentAlign: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
+                                        <option value="right">يمين</option>
+                                        <option value="center">وسط</option>
+                                        <option value="left">يسار</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-gray-500 mb-1 block">موقع المحتوى رأسياً</label>
+                                    <select value={heroProps.contentPosition || 'center'} onChange={(e) => { handleUpdateLive({ contentPosition: e.target.value }); saveHistory(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
+                                        <option value="top">أعلى</option>
+                                        <option value="center">منتصف</option>
+                                        <option value="bottom">أسفل</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="pt-2">
+                                <SliderWithIdeal label="حجم العنوان الرئيسي" value={heroProps.titleSize || 48} min={20} max={80} ideal={48} onChange={(e) => handleUpdateLive({ titleSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                <SliderWithIdeal label="حجم النص الوصفي" value={heroProps.subtitleSize || 18} min={12} max={36} ideal={18} onChange={(e) => handleUpdateLive({ subtitleSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                <SliderWithIdeal label="المسافة أسفل العنوان" value={heroProps.titleGutter || 16} min={0} max={60} ideal={16} onChange={(e) => handleUpdateLive({ titleGutter: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                <SliderWithIdeal label="المسافة أسفل الوصف" value={heroProps.subtitleGutter || 32} min={0} max={80} ideal={32} onChange={(e) => handleUpdateLive({ subtitleGutter: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                            </div>
+                            <ColorPickerWithDropper label="لون النصوص" value={heroProps.textColor || '#ffffff'} onChange={(val) => handleUpdateLive({ textColor: val })} onBlur={saveHistory} />
+                        </div>
+
+                        {/* تحكم متقدم في مظهر وحجم وأبعاد الزر */}
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <div className="flex items-center justify-between border-b pb-1 mb-2">
+                                <h5 className="text-[11px] font-bold text-gray-700">الزر (CTA)</h5>
+                                <button onClick={() => handleUpdate({ showButton: heroProps.showButton === false ? true : false })} className={`toggle-switch w-8 h-4 rounded-full relative ${heroProps.showButton !== false ? 'active' : 'bg-gray-200'}`}>
+                                    <span className="toggle-dot absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-white shadow"></span>
+                                </button>
+                            </div>
+                            {heroProps.showButton !== false && (
+                                <>
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 mb-1 block">نص الزر</label>
+                                        <input type="text" value={heroProps.buttonText || 'تسوق الآن'} onChange={(e) => handleUpdateLive({ buttonText: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-xs" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <ColorPickerWithDropper label="لون خلفية الزر" value={heroProps.btnColor || '#ffffff'} onChange={(val) => handleUpdateLive({ btnColor: val })} onBlur={saveHistory} />
+                                        <ColorPickerWithDropper label="لون نص الزر" value={heroProps.btnTextColor || '#1e293b'} onChange={(val) => handleUpdateLive({ btnTextColor: val })} onBlur={saveHistory} />
+                                    </div>
+                                    <div className="pt-1">
+                                        <SliderWithIdeal label="حجم نص الزر" value={heroProps.btnFontSize || 16} min={12} max={28} ideal={16} onChange={(e) => handleUpdateLive({ btnFontSize: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <SliderWithIdeal label="الاتساع الأفقي" value={heroProps.btnPaddingX || 32} min={12} max={64} ideal={32} onChange={(e) => handleUpdateLive({ btnPaddingX: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                            <SliderWithIdeal label="الاتساع الرأسي" value={heroProps.btnPaddingY || 14} min={6} max={32} ideal={14} onChange={(e) => handleUpdateLive({ btnPaddingY: parseInt(e.target.value) })} onDragEnd={saveHistory} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-gray-500 mb-1 block">وجهة الزر</label>
+                                        <select value={heroProps.btnLinkType || 'page'} onChange={(e) => { const val = e.target.value; handleUpdate({ btnLinkType: val, buttonLink: val !== 'external' ? val : '' }); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
+                                            <option value="external">رابط خارجي...</option>
+                                            <optgroup label="صفحات متجرك">
+                                                {state.pages.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    {heroProps.btnLinkType === 'external' && (
+                                        <input type="url" placeholder="https://" value={heroProps.buttonLink || ''} onChange={(e) => handleUpdateLive({ buttonLink: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]" />
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+
+            case 'products':
+                const prodProps = selectedSection.props;
+                const updateProd = (key, value) => {
+                    dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } });
+                };
+                const saveProd = () => dispatch({ type: 'SAVE_HISTORY' });
+                return (
+                    <div className="space-y-4 pb-4">
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">مظهر وبنية شبكة المنتجات</h5>
+                            <div>
+                                <label className="text-[10px] text-gray-500 mb-1 block">نمط التصميم</label>
+                                <select value={prodProps.cardStyle || 'style1'} onChange={(e) => { updateProd('cardStyle', e.target.value); saveProd(); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
+                                    <option value="style1">بطاقة مع زر إضافة سريع متطور</option>
+                                    <option value="style2">تضمين اسم وشعار الشركة المصنعة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <h5 className="text-[11px] font-bold text-gray-700 border-b pb-1 mb-2">توزيع الأعمدة المستجيب</h5>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label className="text-[9px] text-gray-500 mb-1 block">شاشة حاسوب</label>
+                                    <select value={prodProps.columns || 4} onChange={(e) => { updateProd('columns', parseInt(e.target.value)); saveProd(); }} className="input-field w-full px-1 py-1.5 rounded text-xs text-center">
+                                        <option value={3}>3 أعمدة</option>
+                                        <option value={4}>4 أعمدة</option>
+                                        <option value={5}>5 أعمدة</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] text-gray-500 mb-1 block">تابلت</label>
+                                    <select value={prodProps.columnsTablet || 3} onChange={(e) => { updateProd('columnsTablet', parseInt(e.target.value)); saveProd(); }} className="input-field w-full px-1 py-1.5 rounded text-xs text-center">
+                                        <option value={2}>2 عمود</option>
+                                        <option value={3}>3 أعمدة</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] text-gray-500 mb-1 block">الهاتف الذكي</label>
+                                    <select value={prodProps.columnsMobile || 2} disabled className="input-field w-full px-1 py-1.5 rounded text-xs text-center bg-gray-100 cursor-not-allowed opacity-80 font-bold text-blue-600">
+                                        <option value={2}>2 عمود (مثالي)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <p className="text-[9px] text-blue-500 mt-1">💡 تم تأمين عرض عمودين متجاورين على الموبايل تلقائياً ليناسب شاشات العرض الاحترافية الحقيقية.</p>
+                        </div>
+                    </div>
+                );
+default:
+return <p className="text-sm text-gray-500 p-4">الإعدادات الخاصة بهذا القسم في المرحلة القادمة أو بسيطة.</p>;
+}
+};
+return (
+<div className="w-80 shrink-0 glass-panel shadow-medium border-r border-gray-200 flex flex-col h-full animate-slide-in-left">
+<div className="flex items-center justify-between p-4 border-b border-gray-200">
+<div className="flex items-center gap-2">
+<div className="p-2 rounded-lg bg-blue-50 text-blue-600"><Icon name="Settings" size={18} /></div>
+<h3 className="font-semibold text-gray-800">إعدادات العنصر</h3>
+</div>
+<button onClick={() => dispatch({ type: 'SELECT_SECTION', payload: null })} className="p-2 rounded-lg hover:bg-gray-100 transition-all">
+<Icon name="X" size={18} className="text-gray-500" />
+</button>
+</div>
+<div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+<div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+<span className="text-xs text-blue-600 font-medium">نوع العنصر</span>
+<p className="font-semibold text-gray-800 mt-1">{widgetTypes.find(w => w.id === selectedSection.type)?.name || selectedSection.type}</p>
+</div>
+{renderSettings()}
+</div>
+<div className="p-4 border-t border-gray-200">
+<button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all font-medium">
+<Icon name="Trash" size={18} />
+حذف العنصر
+</button>
+</div>
+</div>
+);
+};
+
+// ==================== CANVAS COMPONENT (معدل) ====================
+const Canvas = ({ viewport }) => {
+    const { state, dispatch } = useContext(AppContext);
+    const canvasRef = useRef(null);
+    
+    const activePage = state.pages.find(p => p.id === state.activePage);
+    const sections = activePage?.sections || [];
+    const isImmersive = activePage?.heroMode === 'immersive';
+    const headerTransparency = activePage?.headerTransparency || 0;
+    
+    const heroSection = sections.find(s => s.type === 'hero');
+    const footerSection = sections.find(s => s.type === 'footer');
+    const movableSections = sections.filter(s => s.type !== 'hero' && s.type !== 'footer');
+
+    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; if (canvasRef.current) canvasRef.current.classList.add('drop-zone-active'); };
+    const handleDragLeave = (e) => { if (canvasRef.current && !canvasRef.current.contains(e.relatedTarget)) canvasRef.current.classList.remove('drop-zone-active'); };
+    
+    const getInitialPropsForWidget = (type) => {
+        switch (type) {
+            case 'hero': return { title: 'عنوان البانر الرئيسي', subtitle: 'أضف وصفاً جذاباً لمنتجك أو خدمتك هنا', buttonText: 'تسوق الآن', showButton: true, bannerHeight: 'md', overlay: 40, textColor: '#ffffff', mediaType: 'image', mediaUrls: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'], btnColor: '#ffffff', btnTextColor: '#1e293b', btnSize: 'md', contentAlign: 'center', contentPosition: 'center', titleSize: 48 };
+            case 'products': return { title: 'منتجاتنا المميزة', listType: 'dynamic', columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1', mainCategory: 'الكل', enableSub: false, subCategory: 'الكل', activeFilters: [] };
+            case 'categories': return { title: 'تصفح الفئات', columns: 4, columnsTablet: 3, columnsMobile: 2, overlayOpacity: 40, overlayColor: '#000000', contentAlign: 'center', contentPosition: 'bottom', showCardButton: false, categories: [ { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', buttonText: 'تصفح', link: '', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' }, { id: 'c2', name: 'أزياء', subtitle: '243 منتج', buttonText: 'تصفح', link: '', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' } ] };
+            case 'banner': return { title: 'عرض خاص', description: 'احصل على خصم 50% على جميع المنتجات', buttonText: 'تسوق الآن', bgColor: state.themeColors.primary };
+            case 'spacer': return { height: 50 };
+            case 'text': return { text: '<p>اضغط هنا للبدء في كتابة نصك... يمكنك تظليل النص لتنسيقه بسهولة.</p>', textAlign: 'center', bgColor: 'transparent', textColor: '#1e293b' };
+            case 'features': return { title: 'لماذا نحن؟', showTitle: true, features: [{ id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات المضمونة' }, { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }, { id: 'f3', icon: 'Shield', title: 'دفع آمن', desc: 'حماية كاملة لبياناتك' }] };
+            case 'testimonial': return { title: 'آراء العملاء' };
+            case 'newsletter': return { title: 'اشترك في نشرتنا البريدية', subtitle: 'احصل على أحدث العروض والخصومات', bgColor: '#f8fafc', textColor: '#1e293b' };
+            case 'footer': return { bgColor: '#1e293b', textColor: '#ffffff' };
+            default: return { title: 'قسم جديد' };
+        }
+    };
+
+    const handleDrop = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        if (canvasRef.current) canvasRef.current.classList.remove('drop-zone-active'); 
+        
+        const widgetType = e.dataTransfer.getData('widgetType'); 
+        if (widgetType) { 
+            if ((widgetType === 'hero' && heroSection) || (widgetType === 'footer' && footerSection)) {
+                alert(`مسموح بقسم "${widgetTypes.find(w=>w.id===widgetType)?.name}" واحد فقط في الصفحة.`);
+                return;
+            }
+            const newSection = { id: generateId(), type: widgetType, props: getInitialPropsForWidget(widgetType) }; 
+            dispatch({ type: 'ADD_SECTION', payload: newSection }); 
+            dispatch({ type: 'SAVE_HISTORY' }); 
+        } 
+    };
+    
+    const handleSelectSection = (sectionId) => dispatch({ type: 'SELECT_SECTION', payload: sectionId });
+    const handleUpdateSection = (sectionId, props) => { dispatch({ type: 'UPDATE_SECTION', payload: { id: sectionId, props } }); dispatch({ type: 'SAVE_HISTORY' }); };
+    
+    const handleSectionReorder = (draggedId, targetId) => {
+        const newSections = [...sections];
+        const dragIndex = newSections.findIndex(s => s.id === draggedId);
+        const targetIndex = newSections.findIndex(s => s.id === targetId);
+        if (dragIndex > -1 && targetIndex > -1) {
+            const [removed] = newSections.splice(dragIndex, 1);
+            newSections.splice(targetIndex, 0, removed);
+            dispatch({ type: 'REORDER_SECTIONS', payload: newSections });
+            dispatch({ type: 'SAVE_HISTORY' });
+        }
+    };
+
+    // إعدادات أبعاد المحاكاة المتطورة (معدل)
+    const viewportStyles = {
+        desktop: { width: '100%', maxWidth: '1024px', minHeight: 'calc(100vh - 120px)', borderRadius: '16px', margin: '0 auto', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)' },
+        tablet: { width: '768px', height: '1024px', borderRadius: '24px', border: '12px solid #1e293b', margin: '20px auto', overflowY: 'auto' },
+        mobile: { width: '393px', height: '852px', borderRadius: '48px', border: '14px solid #1e293b', margin: '20px auto', overflowY: 'auto', relative: true, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }
+    };
+
+    const hexToRgba = (hex, alpha) => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; };
+    const headerAlpha = 1 - (headerTransparency / 100);
+    const topBarBg = isImmersive ? hexToRgba(state.headerSettings.topBarBgColor, headerAlpha) : state.headerSettings.topBarBgColor;
+    const navBarBg = isImmersive ? hexToRgba(state.headerSettings.navBgColor, headerAlpha) : state.headerSettings.navBgColor;
+    const getLogoShapeStyle = (shape) => { switch(shape) { case 'circle': return 'rounded-full aspect-square object-cover'; case 'rounded': return 'rounded-xl aspect-square object-cover'; case 'triangle': return 'aspect-square object-cover'; default: return 'object-contain'; } };
+    const navIconColor = state.headerSettings.navIconColor || state.headerSettings.navTextColor;
+
+    return (
+        <div 
+            className="flex-1 w-full overflow-y-auto overflow-x-hidden canvas-bg p-6 flex scrollbar-thin pb-32" 
+            onClick={() => dispatch({ type: 'SELECT_SECTION', payload: null })}
+            style={{ '--accent': state.themeColors.primary, '--accent-dark': state.themeColors.secondary, '--accent-light': state.themeColors.accent, fontFamily: state.themeColors.fontFamily || 'Cairo' }}
+        >
+            <div 
+                ref={canvasRef} 
+                className="bg-white h-max mb-12 overflow-hidden transition-all duration-300 relative flex flex-col shrink-0 mx-auto" 
+                style={viewportStyles[viewport]} 
+                onDragOver={handleDragOver} 
+                onDragLeave={handleDragLeave} 
+                onDrop={handleDrop}
+            >
+                {/* إضافة نوتش جزيرة تفاعلية وشريط سفلي فقط في وضع الهاتف (جديد) */}
+                {viewport === 'mobile' && (
+                    <>
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z-[110] pointer-events-none flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-[#0f172a] ml-12"></div>
+                        </div>
+                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-[#1e293b] rounded-full z-[110] pointer-events-none"></div>
+                    </>
+                )}
+
+                <div className={isImmersive ? 'header-immersive w-full' : 'w-full shrink-0'}>
+                    {activePage?.showTopBar && state.headerSettings.topBarVisible && (
+                        <div className="py-2 px-4 flex items-center justify-between text-xs font-medium transition-all" style={{ backgroundColor: topBarBg, color: state.headerSettings.topBarTextColor }}>
+                            <div className={`flex items-center gap-3 ${state.headerSettings.socialPosition === 'right' ? 'order-1' : 'order-3'}`}>
+                                {state.headerSettings.socialLinks.map(link => link.visible && link.url && (
+                                    <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={{ color: state.headerSettings.socialColor }} className="hover:scale-110 transition-transform"><Icon name={link.icon} size={state.headerSettings.socialIconSize || 15} /></a>
+                                ))}
+                            </div>
+                            <div className="flex-1 text-center order-2 px-4">{state.headerSettings.topBarText}</div>
+                            <div className={`flex items-center gap-3 w-px ${state.headerSettings.socialPosition === 'left' ? 'order-1' : 'order-3'}`}></div>
+                        </div>
+                    )}
+                    
+                    <nav className="py-3 px-6 flex items-center w-full transition-all gap-4" style={{ backgroundColor: navBarBg, color: state.headerSettings.navTextColor, borderColor: activePage?.headerTransparency > 20 ? 'transparent' : 'rgba(226, 232, 240, 0.5)', borderBottomWidth: activePage?.headerTransparency > 20 ? '0' : '1px' }}>
+                        {(() => {
+                            const navOrder = state.headerSettings.navOrder;
+                            const logoIndex = navOrder.indexOf('logo');
+                            const leftItems = logoIndex !== -1 ? navOrder.slice(0, logoIndex) : navOrder;
+                            const rightItems = logoIndex !== -1 ? navOrder.slice(logoIndex + 1) : [];
+
+                            const renderNavItem = (itemId) => {
+                                const item = state.headerSettings.navItems.find(i => i.id === itemId);
+                                if (!item || !item.visible) return null;
+                                if (item.type === 'menu' || item.type === 'search') return <button key={item.id} className="p-2 rounded-lg hover:bg-black/5 transition-all" style={{ color: navIconColor }}><Icon name={item.type === 'menu' ? 'Menu' : 'Search'} size={state.headerSettings.navIconSize || 20} /></button>;
+                                if (item.type === 'cart') return (
+                                    <button key={item.id} className="p-2 rounded-lg hover:bg-black/5 transition-all relative" style={{ color: navIconColor }}>
+                                        <Icon name="ShoppingCart" size={state.headerSettings.navIconSize || 20} />
+                                        {item.count > 0 && <span className="absolute -top-1 -left-1 w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center font-bold shadow-sm" style={{ backgroundColor: state.themeColors.primary }}>{item.count}</span>}
+                                    </button>
+                                );
+                                if (item.type === 'language') return (
+                                    <div key={item.id} className="flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer hover:bg-black/5 transition-colors border" style={{ borderColor: `${navIconColor}30` }}>
+                                        <span className="text-[9px] font-bold opacity-100" style={{ color: navIconColor }}>AR</span>
+                                        <div className="w-5 h-2.5 rounded-full relative shadow-inner transition-colors duration-300 bg-gray-200"><div className="absolute top-[1px] w-1.5 h-1.5 bg-white rounded-full shadow-sm right-[2px]"></div></div>
+                                        <span className="text-[9px] font-bold uppercase opacity-50" style={{ color: navIconColor }}>EN</span>
+                                    </div>
+                                );
+                                return null;
+                            };
+
+                            return (
+                                <>
+                                    <div className="flex items-center gap-4 flex-1 justify-start">{leftItems.map(renderNavItem)}</div>
+                                    {state.headerSettings.navItems.find(i => i.type === 'logo')?.visible && (
+                                        <div className="flex items-center justify-center px-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity gap-2">
+                                            {state.headerSettings.logoImage && <img src={state.headerSettings.logoImage} alt="Logo" style={{ height: `${state.headerSettings.logoSize}px`, ...(state.headerSettings.logoShape === 'triangle' ? { clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'} : {}) }} className={getLogoShapeStyle(state.headerSettings.logoShape)} />}
+                                            {state.headerSettings.showLogoText && <span className="font-bold font-display whitespace-nowrap" style={{ color: state.themeColors.primary, fontSize: `${Math.max(16, state.headerSettings.logoSize / 2)}px` }}>{state.headerSettings.logo}</span>}
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-4 flex-1 justify-end">{rightItems.map(renderNavItem)}</div>
+                                </>
+                            );
+                        })()}
+                    </nav>
+                </div>
+                
+                <div className={`relative flex-1 flex flex-col ${isImmersive && !heroSection ? 'pt-0' : ''}`}>
+                    {sections.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-32 text-gray-400 flex-1">
+                            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 mb-6"><Icon name="Layers" size={48} className="text-blue-400" /></div>
+                            <p className="text-lg font-medium text-gray-600 mb-2">ابدأ ببناء صفحتك</p>
+                            <p className="text-sm text-gray-400">اسحب العناصر من القائمة الجانبية المفتوحة</p>
+                        </div>
+                    ) : (
+                        <>
+                            {heroSection && (
+                                <div className="relative group shrink-0 w-full" style={isImmersive ? { marginTop: '-120px' } : {}}>
+                                    {renderSection(heroSection, state.selectedSection === heroSection.id, handleSelectSection, handleUpdateSection, viewport)}
+                                </div>
+                            )}
+                            
+                            {movableSections.length > 0 && (
+                                <div className="flex-1 w-full relative z-10">
+                                    <SectionList
+                                        sections={movableSections}
+                                        selectedSection={state.selectedSection}
+                                        onSelect={handleSelectSection}
+                                        onUpdate={handleUpdateSection}
+                                        onReorder={handleSectionReorder}
+                                        viewport={viewport}
+                                    />
+                                </div>
+                            )}
+
+                            {footerSection && (
+                                <div className="relative group shrink-0 mt-auto w-full">
+                                    {renderSection(footerSection, state.selectedSection === footerSection.id, handleSelectSection, handleUpdateSection, viewport)}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ==================== MAIN APP COMPONENT ====================
+const MainAppContent = () => {
+    const [state, dispatch] = useReducer(appReducer, initialState);
+    const [viewport, setViewport] = useState('desktop');
+    const [autoSaveStatus, setAutoSaveStatus] = useState('saved');
+    const { addToast } = useContext(ToastContext);
+    
+    useEffect(() => {
+        const saveTimeout = setTimeout(() => {
+            try {
+                localStorage.setItem('storeBuilderProState', JSON.stringify({ pages: state.pages, activePage: state.activePage, headerSettings: state.headerSettings, themeColors: state.themeColors, hoverEffects: state.hoverEffects }));
+                setAutoSaveStatus('saved');
+            } catch (e) {
+                addToast('فشل الحفظ: المساحة ممتلئة.', 'error');
+                setAutoSaveStatus('error');
+            }
+        }, 800);
+        setAutoSaveStatus('saving');
+        return () => clearTimeout(saveTimeout);
+    }, [state, addToast]);
+    
+    useEffect(() => {
+        const saved = localStorage.getItem('storeBuilderProState');
+        if (saved) { try { const parsed = JSON.parse(saved); dispatch({ type: 'LOAD_STATE', payload: parsed }); } catch (e) { console.error('Failed to load:', e); } }
+        dispatch({ type: 'SAVE_HISTORY' });
+    }, []);
+    
+    const handleExport = () => { 
+        try {
+            const data = { pages: state.pages, headerSettings: state.headerSettings, themeColors: state.themeColors, hoverEffects: state.hoverEffects, exportDate: new Date().toISOString() }; 
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); 
+            const url = URL.createObjectURL(blob); 
+            const a = document.createElement('a'); a.href = url; a.download = `store-design-${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); 
+            addToast('تم تصدير التصميم بنجاح!', 'success');
+        } catch(e) {
+            addToast('حدث خطأ أثناء التصدير.', 'error');
+        }
+    };
+    
+    const handleImport = (e) => { 
+        const file = e.target.files[0]; 
+        if (file) { 
+            const reader = new FileReader(); 
+            reader.onload = (event) => { 
+                try { 
+                    const data = JSON.parse(event.target.result); 
+                    dispatch({ type: 'IMPORT_DATA', payload: data }); 
+                    dispatch({ type: 'SAVE_HISTORY' }); 
+                    addToast('تم استيراد التصميم بنجاح!', 'success');
+                } catch (err) { 
+                    addToast('خطأ: الملف غير صالح أو تالف.', 'error'); 
+                } 
+            }; 
+            reader.readAsText(file); 
+        } 
+        e.target.value = ''; 
+    };
+    
+    const handleUndo = () => dispatch({ type: 'UNDO' });
+    const handleRedo = () => dispatch({ type: 'REDO' });
+    
+    const canUndo = state.historyIndex > 0;
+    const canRedo = state.historyIndex < state.history.length - 1;
+    
+    return (
+        <AppContext.Provider value={{ state, dispatch }}>
+            <div className="h-screen w-full flex flex-col overflow-hidden relative bg-gray-50" style={{ fontFamily: state.themeColors.fontFamily || 'Cairo' }}>
+                <FloatingToolbar />
+                <TopToolbar viewport={viewport} setViewport={setViewport} onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} onExport={handleExport} onImport={handleImport} autoSaveStatus={autoSaveStatus} />
+                
+                <div className="fixed top-16 right-0 bottom-0 z-40 pointer-events-none w-80">
+                    <div className="pointer-events-auto h-full w-full relative">
+                        <Sidebar />
+                    </div>
+                </div>
+                
+                <div className="fixed top-16 left-0 bottom-0 z-40 pointer-events-none">
+                    <div className="pointer-events-auto h-full w-full">
+                        {state.selectedSection && <SettingsPanel viewport={viewport} />}
+                    </div>
+                </div>
+                
+                <div className="flex-1 w-full pt-16 relative z-0 flex overflow-hidden">
+                    <Canvas viewport={viewport} />
+                </div>
+            </div>
+        </AppContext.Provider>
+    );
+};
+
+const App = () => (
+    <ToastProvider>
+        <MainAppContent />
+    </ToastProvider>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
+
