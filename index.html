@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Store Builder Pro - Modified</title>
+<title>Store Builder Pro - Live Preview</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -556,7 +556,7 @@ return (
 );
 };
 
-// ==================== TOP TOOLBAR COMPONENT ====================
+// ==================== TOP TOOLBAR COMPONENT (معدل) ====================
 const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, onExport, onImport, autoSaveStatus }) => {
     const { state } = useContext(AppContext);
     const { addToast } = useContext(ToastContext);
@@ -567,8 +567,25 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
         setTimeout(() => addToast('تم نشر الموقع بنجاح! الرابط جاهز للنسخ.', 'success'), 1500);
     };
 
+    // الدالة الجديدة لفتح المعاينة الخارجية في لسان تبويب منفصل
     const handlePreview = () => {
-        addToast('جاري فتح المعاينة في نافذة جديدة...');
+        try {
+            // حفظ الحالة الحالية للتصميم لكي تقرأها الصفحة الجديدة
+            const previewData = {
+                pages: state.pages,
+                headerSettings: state.headerSettings,
+                themeColors: state.themeColors,
+                hoverEffects: state.hoverEffects,
+                activePage: state.activePage
+            };
+            localStorage.setItem('storeBuilderPreviewState', JSON.stringify(previewData));
+            
+            // فتح الرابط الحالي مع إضافة متغير المعاينة في تبويب جديد
+            const previewUrl = window.location.origin + window.location.pathname + '?preview=true';
+            window.open(previewUrl, '_blank');
+        } catch (e) {
+            addToast('حدث خطأ أثناء تحضير صفحة المعاينة', 'error');
+        }
     };
 
     return (
@@ -627,7 +644,7 @@ const TopToolbar = ({ viewport, setViewport, onUndo, onRedo, canUndo, canRedo, o
     );
 };
 
-// ==================== SIDEBAR COMPONENT (تم التعديل - المرحلة الأولى) ====================
+// ==================== SIDEBAR COMPONENT ====================
 const Sidebar = () => {
     const { state, dispatch } = useContext(AppContext);
     const [activeTab, setActiveTab] = useState('widgets');
@@ -657,7 +674,6 @@ const Sidebar = () => {
     return (
         <aside className={`absolute flex flex-col bg-white/95 backdrop-blur-xl border-gray-200 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-50 ${isExpanded ? 'w-80 h-full top-0 right-0 border-l shadow-medium rounded-none' : 'w-16 h-[500px] top-1/2 -translate-y-1/2 right-4 rounded-2xl border shadow-xl'}`}>
             
-            {/* زر الطي والفرد - مظهر وتأثير حركة أكثر سلاسة */}
             <button 
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2 z-50 bg-white border border-gray-200 shadow-md rounded-full w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all duration-500 hover:scale-110"
@@ -668,7 +684,6 @@ const Sidebar = () => {
                 </svg>
             </button>
 
-            {/* حاوية الأيقونات (التبويبات) */}
             <div className={`flex transition-all duration-500 ${isExpanded ? 'flex-row border-b border-gray-200 w-full px-2 pt-2' : 'flex-col gap-3 items-center justify-center w-full pt-4'}`}>
                 {[ { id: 'widgets', name: 'العناصر', icon: 'Grid' }, { id: 'pages', name: 'الصفحات', icon: 'FileText' }, { id: 'header', name: 'الترويسة', icon: 'Header' }, { id: 'theme', name: 'الثيم', icon: 'Palette' } ].map(tab => (
                     <button
@@ -689,7 +704,6 @@ const Sidebar = () => {
                 ))}
             </div>
             
-            {/* محتوى القائمة */}
             <div className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin transition-opacity duration-300 ${isExpanded ? 'opacity-100 delay-150 p-4 w-80' : 'opacity-0 pointer-events-none absolute invisible w-0 h-0'}`}>
                 {activeTab === 'widgets' && (
                     <div className="space-y-2">
@@ -1046,18 +1060,11 @@ const HeroSection = ({ section, isSelected, onSelect, onUpdate }) => {
     );
 };
 
-
-// ==================== PRODUCTS SECTION COMPONENT (محدث ومطور) ====================
+// ==================== PRODUCTS SECTION COMPONENT (محدث) ====================
 const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
     const { 
-        title, listType = 'dynamic', productIds,
-        columns, columnsTablet, columnsMobile, 
-        cardStyle = 'style1', 
-        mainCategory = 'الكل', enableSub = false, subCategory = 'الكل',
-        activeFilters = [], showAddToCart = true, showFilters = true, showRating = true
+        title, cardStyle = 'style1', showAddToCart = true, showRating = true, columns, columnsTablet, columnsMobile
     } = section.props || {};
-
-    const [activeFilter, setActiveFilter] = useState('الكل');
 
     const getColumns = () => { 
         if (viewport === 'mobile') return columnsMobile || 2; 
@@ -1066,16 +1073,11 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
     };
 
     const allProducts = [
-        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين', price: '60.00', oldPrice: '75.00', category: 'ملابس', subCategory: 'تيشيرتات', brand: 'زارا', color: 'رمادي', size: 'M', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
-        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف خامات ممتازة', price: '45.00', oldPrice: null, category: 'أحذية', subCategory: 'رياضية', brand: 'نايك', color: 'أبيض', size: '42', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
-        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة سير جلد طبيعي', price: '50.00', oldPrice: '60.00', category: 'ساعات', subCategory: 'ساعات جلد', brand: 'كاسيو', color: 'أسود', size: 'موحد', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
-        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري راقٍ', price: '50.00', oldPrice: '60.00', category: 'ملابس', subCategory: 'فساتين', brand: 'مانجو', color: 'بيج', size: 'L', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
+        { id: 'P1', name: 'طقم ولادي صيفي مريح قطعتين', price: '60.00', oldPrice: '75.00', category: 'ملابس', company: 'أزياء العصر', logo: '👕', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', rating: 5 },
+        { id: 'P2', name: 'حذاء رياضي كاجوال خفيف', price: '45.00', oldPrice: null, category: 'أحذية', company: 'أكتيف ستور', logo: '👟', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', rating: 4 },
+        { id: 'P3', name: 'ساعة يد كلاسيكية فاخرة', price: '50.00', oldPrice: '60.00', category: 'ساعات', company: 'تايم زون', logo: '⌚', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80', rating: 4 },
+        { id: 'P4', name: 'فستان سهرة أنيق بتصميم عصري', price: '50.00', oldPrice: '60.00', category: 'ملابس', company: 'أناقة بوتيك', logo: '👗', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80', rating: 4 }
     ];
-
-    const categories = ['الكل', ...new Set(allProducts.map(p => p.category))];
-    const [selectedFilters, setSelectedFilters] = useState({});
-
-    let displayedProducts = allProducts;
 
     return (
         <div onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className={`p-3 md:p-6 transition-all cursor-pointer ${isSelected ? 'section-selected' : ''}`}>
@@ -1086,17 +1088,14 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
                     </h3>
                 </div>
 
-                {/* شبكة المنتجات المستجيبة - مصممة خصيصاً للهواتف لتعرض بطاقتين بذكاء وأناقة */}
                 <div className="grid gap-3 md:gap-6" style={{ gridTemplateColumns: `repeat(${getColumns()}, minmax(0, 1fr))` }}>
-                    {displayedProducts.map(product => {
-                        // حساب نسبة الخصم تلقائياً إن وجد سعر قديم
+                    {allProducts.map(product => {
                         const hasDiscount = product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price);
                         const discountPercent = hasDiscount ? Math.round(((parseFloat(product.oldPrice) - parseFloat(product.price)) / parseFloat(product.oldPrice)) * 100) : 0;
 
                         return (
                             <div key={product.id} className="product-card group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-soft flex flex-col h-full relative transition-all duration-300">
                                 
-                                {/* شارة الخصم الذكية المنحنية */}
                                 {hasDiscount && (
                                     <div className="absolute top-2.5 right-2.5 z-20 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm select-none">
                                         {discountPercent}%-
@@ -1110,20 +1109,12 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
                                     </div>
                                 )}
 
-                                {/* حاوية الصورة المطورة: تظهر الصورة الطبيعية مصغرة ومحاطة بهامش داخلي لمنع القص */}
                                 <div className="w-full aspect-[4/4] p-3 flex items-center justify-center bg-gray-50/50 relative shrink-0 overflow-hidden">
-                                    <img 
-                                        src={product.image} 
-                                        alt={product.name} 
-                                        className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" 
-                                    />
+                                    <img src={product.image} alt={product.name} className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" />
                                 </div>
                                 
-                                {/* تفاصيل المنتج مرتبة باحترافية للموبايل والديسكتوب */}
                                 <div className="p-3 md:p-4 flex flex-col flex-1 text-center bg-white">
-                                    <h4 className="text-gray-700 font-semibold mb-1.5 text-xs md:text-sm leading-tight line-clamp-2 h-8 md:h-10 text-right md:text-center">
-                                        {product.name}
-                                    </h4>
+                                    <h4 className="text-gray-700 font-semibold mb-1.5 text-xs md:text-sm leading-tight line-clamp-2 h-8 md:h-10 text-right md:text-center">{product.name}</h4>
                                     
                                     <div className="mt-auto">
                                         {showRating !== false && (
@@ -1134,15 +1125,12 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
                                             </div>
                                         )}
                                         
-                                        {/* منطقة عرض السعر والعملة بطريقة هندسية متناسقة */}
                                         <div className="flex items-center justify-start md:justify-center gap-1.5 mb-3" dir="rtl">
                                             <span className="font-extrabold text-sm md:text-base text-gray-900">
                                                 {product.price} <span className="text-[10px] md:text-xs font-normal text-gray-500">ر.س</span>
                                             </span>
                                             {hasDiscount && (
-                                                <span className="text-[11px] md:text-xs text-gray-400 line-through decoration-gray-400">
-                                                    {product.oldPrice} ر.س
-                                                </span>
+                                                <span className="text-[11px] md:text-xs text-gray-400 line-through decoration-gray-400">{product.oldPrice} ر.س</span>
                                             )}
                                         </div>
 
@@ -1164,7 +1152,6 @@ const ProductsSection = ({ section, isSelected, onSelect, onUpdate, viewport }) 
 };
 
 // ==================== CATEGORIES, BANNER, FEATURES, NEWSLETTER, FOOTER SECTIONS ====================
-// (تم اختصارها للتركيز على التعديلات الرئيسية، ولكنها موجودة في الكود الكامل)
 const CategoriesSection = ({ section, isSelected, onSelect, onUpdate, viewport }) => {
     const { title = 'تصفح الفئات', columns = 4, overlayOpacity = 40, overlayColor = '#000000', contentAlign = 'center', contentPosition = 'bottom', showCardButton = false, cardButtonBg = '#ffffff', cardButtonText = '#1e293b', categories = [
         { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', buttonText: 'تسوق', link: '#', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' },
@@ -1317,7 +1304,6 @@ const FooterSection = ({ section, isSelected, onSelect }) => {
     );
 };
 
-
 // ==================== DRAGGABLE SECTION LIST ====================
 const SectionList = ({ sections, selectedSection, onSelect, onUpdate, onReorder, viewport }) => {
     const [draggedId, setDraggedId] = useState(null);
@@ -1375,10 +1361,6 @@ const SectionList = ({ sections, selectedSection, onSelect, onUpdate, onReorder,
                         <div className="p-2 cursor-grab active:cursor-grabbing hover:bg-gray-50 flex items-center justify-center" title="اسحب من هنا لتغيير الترتيب">
                             <Icon name="GripVertical" size={14} className="text-gray-400" />
                         </div>
-                        <div className="w-full h-px bg-gray-100"></div>
-                        <button onClick={(e) => { e.stopPropagation(); onSelect(section.id); }} className="p-2 hover:bg-blue-50 flex items-center justify-center text-blue-500" title="فتح الإعدادات">
-                            <Icon name="Settings" size={14} />
-                        </button>
                     </div>
                     
                     {draggedId && <div className="absolute inset-0 z-40"></div>}
@@ -1404,7 +1386,7 @@ default: return <div onClick={(e) => { e.stopPropagation(); onSelect(section.id)
 }
 };
 
-// ==================== SETTINGS PANEL COMPONENT (معدل) ====================
+// ==================== SETTINGS PANEL COMPONENT ====================
 const SettingsPanel = ({ viewport }) => {
 const { state, dispatch } = useContext(AppContext);
 const { addToast } = useContext(ToastContext);
@@ -1462,7 +1444,7 @@ case 'hero':
                                     <select value={heroProps.mediaType || 'image'} onChange={(e) => handleUpdate({ mediaType: e.target.value, mediaUrls: [] })} className="input-field w-full px-2 py-1.5 rounded-lg text-xs">
                                         <option value="image">صورة ثابتة</option>
                                         <option value="video">فيديو</option>
-                                        <option value="slider">صور متعددة (Slider)</option>
+                                        <option value="slider">صور متعددة</option>
                                     </select>
                                 </div>
                             </div>
@@ -1537,25 +1519,13 @@ case 'hero':
                                             <SliderWithIdeal label="الاتساع الرأسي" value={heroProps.btnPaddingY || 14} min={6} max={32} ideal={14} onChange={(e) => handleUpdateLive({ btnPaddingY: parseInt(e.target.value) })} onDragEnd={saveHistory} />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] text-gray-500 mb-1 block">وجهة الزر</label>
-                                        <select value={heroProps.btnLinkType || 'page'} onChange={(e) => { const val = e.target.value; handleUpdate({ btnLinkType: val, buttonLink: val !== 'external' ? val : '' }); }} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]">
-                                            <option value="external">رابط خارجي...</option>
-                                            <optgroup label="صفحات متجرك">
-                                                {state.pages.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </optgroup>
-                                        </select>
-                                    </div>
-                                    {heroProps.btnLinkType === 'external' && (
-                                        <input type="url" placeholder="https://" value={heroProps.buttonLink || ''} onChange={(e) => handleUpdateLive({ buttonLink: e.target.value })} onBlur={saveHistory} className="input-field w-full px-2 py-1.5 rounded-lg text-[10px]" />
-                                    )}
                                 </>
                             )}
                         </div>
                     </div>
                 );
 
-            case 'products':
+case 'products':
                 const prodProps = selectedSection.props;
                 const updateProd = (key, value) => {
                     dispatch({ type: 'UPDATE_SECTION', payload: { id: selectedSection.id, props: { [key]: value } } });
@@ -1599,12 +1569,13 @@ case 'hero':
                                     </select>
                                 </div>
                             </div>
-                            <p className="text-[9px] text-blue-500 mt-1">💡 تم تأمين عرض عمودين متجاورين على الموبايل تلقائياً ليناسب شاشات العرض الاحترافية الحقيقية.</p>
+                            <p className="text-[9px] text-blue-500 mt-1">💡 تم تأمين عرض عمودين متجاورين على الموبايل تلقائياً.</p>
                         </div>
                     </div>
                 );
+
 default:
-return <p className="text-sm text-gray-500 p-4">الإعدادات الخاصة بهذا القسم في المرحلة القادمة أو بسيطة.</p>;
+return <p className="text-sm text-gray-500 p-4">الإعدادات الخاصة بهذا القسم بسيطة.</p>;
 }
 };
 return (
@@ -1654,15 +1625,12 @@ const Canvas = ({ viewport }) => {
     
     const getInitialPropsForWidget = (type) => {
         switch (type) {
-            case 'hero': return { title: 'عنوان البانر الرئيسي', subtitle: 'أضف وصفاً جذاباً لمنتجك أو خدمتك هنا', buttonText: 'تسوق الآن', showButton: true, bannerHeight: 'md', overlay: 40, textColor: '#ffffff', mediaType: 'image', mediaUrls: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'], btnColor: '#ffffff', btnTextColor: '#1e293b', btnSize: 'md', contentAlign: 'center', contentPosition: 'center', titleSize: 48 };
-            case 'products': return { title: 'منتجاتنا المميزة', listType: 'dynamic', columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1', mainCategory: 'الكل', enableSub: false, subCategory: 'الكل', activeFilters: [] };
-            case 'categories': return { title: 'تصفح الفئات', columns: 4, columnsTablet: 3, columnsMobile: 2, overlayOpacity: 40, overlayColor: '#000000', contentAlign: 'center', contentPosition: 'bottom', showCardButton: false, categories: [ { id: 'c1', name: 'إلكترونيات', subtitle: '156 منتج', buttonText: 'تصفح', link: '', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' }, { id: 'c2', name: 'أزياء', subtitle: '243 منتج', buttonText: 'تصفح', link: '', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' } ] };
-            case 'banner': return { title: 'عرض خاص', description: 'احصل على خصم 50% على جميع المنتجات', buttonText: 'تسوق الآن', bgColor: state.themeColors.primary };
-            case 'spacer': return { height: 50 };
-            case 'text': return { text: '<p>اضغط هنا للبدء في كتابة نصك... يمكنك تظليل النص لتنسيقه بسهولة.</p>', textAlign: 'center', bgColor: 'transparent', textColor: '#1e293b' };
-            case 'features': return { title: 'لماذا نحن؟', showTitle: true, features: [{ id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات المضمونة' }, { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }, { id: 'f3', icon: 'Shield', title: 'دفع آمن', desc: 'حماية كاملة لبياناتك' }] };
-            case 'testimonial': return { title: 'آراء العملاء' };
-            case 'newsletter': return { title: 'اشترك في نشرتنا البريدية', subtitle: 'احصل على أحدث العروض والخصومات', bgColor: '#f8fafc', textColor: '#1e293b' };
+            case 'hero': return { title: 'عنوان البانر الرئيسي', subtitle: 'أضف وصفاً جذاباً', buttonText: 'تسوق الآن', showButton: true, bannerHeight: 'md', overlay: 40, textColor: '#ffffff', mediaType: 'image', mediaUrls: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80'], btnColor: '#ffffff', btnTextColor: '#1e293b', btnSize: 'md', contentAlign: 'center', contentPosition: 'center', titleSize: 48 };
+            case 'products': return { title: 'منتجاتنا المميزة', columns: 4, columnsTablet: 3, columnsMobile: 2, cardStyle: 'style1' };
+            case 'categories': return { title: 'تصفح الفئات', columns: 4, columnsTablet: 3, columnsMobile: 2, overlayOpacity: 40, overlayColor: '#000000', contentAlign: 'center', contentPosition: 'bottom', showCardButton: false, categories: [ { id: 'c1', name: 'إلكترونيات', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' }, { id: 'c2', name: 'أزياء', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80' } ] };
+            case 'banner': return { title: 'عرض خاص', description: 'احصل على خصم 50%', buttonText: 'تسوق الآن', bgColor: state.themeColors.primary };
+            case 'features': return { title: 'لماذا نحن؟', features: [{ id: 'f1', icon: 'Star', title: 'ضمان الجودة', desc: 'أفضل المنتجات' }, { id: 'f2', icon: 'Truck', title: 'توصيل سريع', desc: 'شحن لجميع المناطق' }] };
+            case 'newsletter': return { title: 'اشترك في نشرتنا', subtitle: 'احصل على أحدث العروض', bgColor: '#f8fafc', textColor: '#1e293b' };
             case 'footer': return { bgColor: '#1e293b', textColor: '#ffffff' };
             default: return { title: 'قسم جديد' };
         }
@@ -1676,7 +1644,7 @@ const Canvas = ({ viewport }) => {
         const widgetType = e.dataTransfer.getData('widgetType'); 
         if (widgetType) { 
             if ((widgetType === 'hero' && heroSection) || (widgetType === 'footer' && footerSection)) {
-                alert(`مسموح بقسم "${widgetTypes.find(w=>w.id===widgetType)?.name}" واحد فقط في الصفحة.`);
+                alert(`مسموح بقسم واحد فقط من هذا النوع في الصفحة.`);
                 return;
             }
             const newSection = { id: generateId(), type: widgetType, props: getInitialPropsForWidget(widgetType) }; 
@@ -1700,7 +1668,7 @@ const Canvas = ({ viewport }) => {
         }
     };
 
-    // إعدادات أبعاد المحاكاة المتطورة (معدل)
+    // إعدادات أبعاد المحاكاة المتطورة
     const viewportStyles = {
         desktop: { width: '100%', maxWidth: '1024px', minHeight: 'calc(100vh - 120px)', borderRadius: '16px', margin: '0 auto', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)' },
         tablet: { width: '768px', height: '1024px', borderRadius: '24px', border: '12px solid #1e293b', margin: '20px auto', overflowY: 'auto' },
@@ -1711,7 +1679,6 @@ const Canvas = ({ viewport }) => {
     const headerAlpha = 1 - (headerTransparency / 100);
     const topBarBg = isImmersive ? hexToRgba(state.headerSettings.topBarBgColor, headerAlpha) : state.headerSettings.topBarBgColor;
     const navBarBg = isImmersive ? hexToRgba(state.headerSettings.navBgColor, headerAlpha) : state.headerSettings.navBgColor;
-    const getLogoShapeStyle = (shape) => { switch(shape) { case 'circle': return 'rounded-full aspect-square object-cover'; case 'rounded': return 'rounded-xl aspect-square object-cover'; case 'triangle': return 'aspect-square object-cover'; default: return 'object-contain'; } };
     const navIconColor = state.headerSettings.navIconColor || state.headerSettings.navTextColor;
 
     return (
@@ -1728,7 +1695,7 @@ const Canvas = ({ viewport }) => {
                 onDragLeave={handleDragLeave} 
                 onDrop={handleDrop}
             >
-                {/* إضافة نوتش جزيرة تفاعلية وشريط سفلي فقط في وضع الهاتف (جديد) */}
+                {/* إضافة نوتش جزيرة تفاعلية فقط في وضع الهاتف */}
                 {viewport === 'mobile' && (
                     <>
                         <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1e293b] rounded-full z-[110] pointer-events-none flex items-center justify-center">
@@ -1743,54 +1710,28 @@ const Canvas = ({ viewport }) => {
                         <div className="py-2 px-4 flex items-center justify-between text-xs font-medium transition-all" style={{ backgroundColor: topBarBg, color: state.headerSettings.topBarTextColor }}>
                             <div className={`flex items-center gap-3 ${state.headerSettings.socialPosition === 'right' ? 'order-1' : 'order-3'}`}>
                                 {state.headerSettings.socialLinks.map(link => link.visible && link.url && (
-                                    <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={{ color: state.headerSettings.socialColor }} className="hover:scale-110 transition-transform"><Icon name={link.icon} size={state.headerSettings.socialIconSize || 15} /></a>
+                                    <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={{ color: state.headerSettings.socialColor }}><Icon name={link.icon} size={state.headerSettings.socialIconSize || 15} /></a>
                                 ))}
                             </div>
                             <div className="flex-1 text-center order-2 px-4">{state.headerSettings.topBarText}</div>
-                            <div className={`flex items-center gap-3 w-px ${state.headerSettings.socialPosition === 'left' ? 'order-1' : 'order-3'}`}></div>
                         </div>
                     )}
                     
-                    <nav className="py-3 px-6 flex items-center w-full transition-all gap-4" style={{ backgroundColor: navBarBg, color: state.headerSettings.navTextColor, borderColor: activePage?.headerTransparency > 20 ? 'transparent' : 'rgba(226, 232, 240, 0.5)', borderBottomWidth: activePage?.headerTransparency > 20 ? '0' : '1px' }}>
-                        {(() => {
-                            const navOrder = state.headerSettings.navOrder;
-                            const logoIndex = navOrder.indexOf('logo');
-                            const leftItems = logoIndex !== -1 ? navOrder.slice(0, logoIndex) : navOrder;
-                            const rightItems = logoIndex !== -1 ? navOrder.slice(logoIndex + 1) : [];
-
-                            const renderNavItem = (itemId) => {
-                                const item = state.headerSettings.navItems.find(i => i.id === itemId);
-                                if (!item || !item.visible) return null;
-                                if (item.type === 'menu' || item.type === 'search') return <button key={item.id} className="p-2 rounded-lg hover:bg-black/5 transition-all" style={{ color: navIconColor }}><Icon name={item.type === 'menu' ? 'Menu' : 'Search'} size={state.headerSettings.navIconSize || 20} /></button>;
-                                if (item.type === 'cart') return (
-                                    <button key={item.id} className="p-2 rounded-lg hover:bg-black/5 transition-all relative" style={{ color: navIconColor }}>
-                                        <Icon name="ShoppingCart" size={state.headerSettings.navIconSize || 20} />
-                                        {item.count > 0 && <span className="absolute -top-1 -left-1 w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center font-bold shadow-sm" style={{ backgroundColor: state.themeColors.primary }}>{item.count}</span>}
-                                    </button>
-                                );
-                                if (item.type === 'language') return (
-                                    <div key={item.id} className="flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer hover:bg-black/5 transition-colors border" style={{ borderColor: `${navIconColor}30` }}>
-                                        <span className="text-[9px] font-bold opacity-100" style={{ color: navIconColor }}>AR</span>
-                                        <div className="w-5 h-2.5 rounded-full relative shadow-inner transition-colors duration-300 bg-gray-200"><div className="absolute top-[1px] w-1.5 h-1.5 bg-white rounded-full shadow-sm right-[2px]"></div></div>
-                                        <span className="text-[9px] font-bold uppercase opacity-50" style={{ color: navIconColor }}>EN</span>
-                                    </div>
-                                );
-                                return null;
-                            };
-
-                            return (
-                                <>
-                                    <div className="flex items-center gap-4 flex-1 justify-start">{leftItems.map(renderNavItem)}</div>
-                                    {state.headerSettings.navItems.find(i => i.type === 'logo')?.visible && (
-                                        <div className="flex items-center justify-center px-4 shrink-0 cursor-pointer hover:opacity-80 transition-opacity gap-2">
-                                            {state.headerSettings.logoImage && <img src={state.headerSettings.logoImage} alt="Logo" style={{ height: `${state.headerSettings.logoSize}px`, ...(state.headerSettings.logoShape === 'triangle' ? { clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'} : {}) }} className={getLogoShapeStyle(state.headerSettings.logoShape)} />}
-                                            {state.headerSettings.showLogoText && <span className="font-bold font-display whitespace-nowrap" style={{ color: state.themeColors.primary, fontSize: `${Math.max(16, state.headerSettings.logoSize / 2)}px` }}>{state.headerSettings.logo}</span>}
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-4 flex-1 justify-end">{rightItems.map(renderNavItem)}</div>
-                                </>
+                    <nav className="py-3 px-6 flex items-center w-full transition-all gap-4" style={{ backgroundColor: navBarBg, color: state.headerSettings.navTextColor, borderBottom: activePage?.headerTransparency > 20 ? 'none' : '1px solid rgba(226, 232, 240, 0.5)' }}>
+                        {state.headerSettings.navOrder.map(itemId => {
+                            const item = state.headerSettings.navItems.find(i => i.id === itemId);
+                            if (!item || !item.visible) return null;
+                            if (item.type === 'logo') return (
+                                <div key={item.id} className="flex items-center gap-2 mx-auto shrink-0">
+                                    {state.headerSettings.logoImage && <img src={state.headerSettings.logoImage} alt="Logo" style={{ height: `${state.headerSettings.logoSize}px` }} className="object-contain" />}
+                                    {state.headerSettings.showLogoText && <span className="font-bold font-display text-lg" style={{ color: state.themeColors.primary }}>{state.headerSettings.logo}</span>}
+                                </div>
                             );
-                        })()}
+                            if (item.type === 'menu' || item.type === 'search') return <button key={item.id} style={{ color: navIconColor }}><Icon name={item.type === 'menu' ? 'Menu' : 'Search'} size={state.headerSettings.navIconSize || 20} /></button>;
+                            if (item.type === 'cart') return <button key={item.id} className="relative" style={{ color: navIconColor }}><Icon name="ShoppingCart" size={state.headerSettings.navIconSize || 20} />{item.count > 0 && <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full text-white text-[9px] flex items-center justify-center font-bold" style={{ backgroundColor: state.themeColors.primary }}>{item.count}</span>}</button>;
+                            if (item.type === 'language') return <div key={item.id} className="text-xs font-bold border rounded-full px-2 py-0.5 opacity-80" style={{ borderColor: `${navIconColor}40`, color: navIconColor }}>العربية</div>;
+                            return null;
+                        })}
                     </nav>
                 </div>
                 
@@ -1799,34 +1740,17 @@ const Canvas = ({ viewport }) => {
                         <div className="flex flex-col items-center justify-center py-32 text-gray-400 flex-1">
                             <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 mb-6"><Icon name="Layers" size={48} className="text-blue-400" /></div>
                             <p className="text-lg font-medium text-gray-600 mb-2">ابدأ ببناء صفحتك</p>
-                            <p className="text-sm text-gray-400">اسحب العناصر من القائمة الجانبية المفتوحة</p>
+                            <p className="text-sm text-gray-400">اسحب العناصر من القائمة الجانبية</p>
                         </div>
                     ) : (
                         <>
-                            {heroSection && (
-                                <div className="relative group shrink-0 w-full" style={isImmersive ? { marginTop: '-120px' } : {}}>
-                                    {renderSection(heroSection, state.selectedSection === heroSection.id, handleSelectSection, handleUpdateSection, viewport)}
+                            {heroSection && <div style={isImmersive ? { marginTop: '0' } : {}}>{renderSection(heroSection, state.selectedSection === heroSection.id, handleSelectSection, handleUpdateSection, viewport)}</div>}
+                            {movableSections.map(section => (
+                                <div key={section.id} className="w-full">
+                                    {renderSection(section, state.selectedSection === section.id, handleSelectSection, handleUpdateSection, viewport)}
                                 </div>
-                            )}
-                            
-                            {movableSections.length > 0 && (
-                                <div className="flex-1 w-full relative z-10">
-                                    <SectionList
-                                        sections={movableSections}
-                                        selectedSection={state.selectedSection}
-                                        onSelect={handleSelectSection}
-                                        onUpdate={handleUpdateSection}
-                                        onReorder={handleSectionReorder}
-                                        viewport={viewport}
-                                    />
-                                </div>
-                            )}
-
-                            {footerSection && (
-                                <div className="relative group shrink-0 mt-auto w-full">
-                                    {renderSection(footerSection, state.selectedSection === footerSection.id, handleSelectSection, handleUpdateSection, viewport)}
-                                </div>
-                            )}
+                            ))}
+                            {footerSection && <div className="mt-auto">{renderSection(footerSection, state.selectedSection === footerSection.id, handleSelectSection, handleUpdateSection, viewport)}</div>}
                         </>
                     )}
                 </div>
@@ -1835,7 +1759,108 @@ const Canvas = ({ viewport }) => {
     );
 };
 
-// ==================== MAIN APP COMPONENT ====================
+// ==================== PUBLIC STORE VIEW COMPONENT ====================
+// هذا المكون يعرض المتجر الإلكتروني كاملاً للمستخدم النهائي بدون الـ Editor
+const PublicStoreView = () => {
+    const [storeState, setStoreState] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // جلب بيانات التصميم التي تم حفظها من الـ Editor
+        const savedData = localStorage.getItem('storeBuilderPreviewState');
+        if (savedData) {
+            try {
+                setStoreState(JSON.parse(savedData));
+            } catch (e) {
+                console.error("خطأ في قراءة بيانات المعاينة", e);
+            }
+        }
+        setLoading(false);
+    }, []);
+
+    if (loading) return <div className="h-screen w-full flex items-center justify-center bg-gray-50 font-bold">جاري تحميل المعاينة...</div>;
+    if (!storeState) return <div className="h-screen w-full flex items-center justify-center bg-gray-50 text-red-500 font-bold">لم يتم العثور على بيانات للتصميم، يرجى تشغيل المعاينة من داخل الـ Editor أولاً.</div>;
+
+    const activePage = storeState.pages.find(p => p.id === storeState.activePage) || storeState.pages[0];
+    const sections = activePage?.sections || [];
+    const isImmersive = activePage?.heroMode === 'immersive';
+    const headerTransparency = activePage?.headerTransparency || 0;
+
+    const heroSection = sections.find(s => s.type === 'hero');
+    const footerSection = sections.find(s => s.type === 'footer');
+    const movableSections = sections.filter(s => s.type !== 'hero' && s.type !== 'footer');
+
+    // دوال وتقنيات العرض النظيف (بدون سحب وإفلات أو تعديل نصوص)
+    const hexToRgba = (hex, alpha) => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; };
+    const headerAlpha = 1 - (headerTransparency / 100);
+    const topBarBg = isImmersive ? hexToRgba(storeState.headerSettings.topBarBgColor, headerAlpha) : storeState.headerSettings.topBarBgColor;
+    const navBarBg = isImmersive ? hexToRgba(storeState.headerSettings.navBgColor, headerAlpha) : storeState.headerSettings.navBgColor;
+    const navIconColor = storeState.headerSettings.navIconColor || storeState.headerSettings.navTextColor;
+
+    const renderStaticSection = (section) => {
+        // تمرير خصائص وهمية لإيقاف تفعيل الـ contentEditable والسحب
+        const props = { section, isSelected: false, onSelect: () => {}, onUpdate: () => {}, viewport: 'desktop' };
+        switch (section.type) {
+            case 'hero': return <HeroSection {...props} />;
+            case 'products': return <ProductsSection {...props} />;
+            case 'categories': return <CategoriesSection {...props} />;
+            case 'banner': return <BannerSection {...props} />;
+            case 'features': return <FeaturesSection {...props} />;
+            case 'newsletter': return <NewsletterSection {...props} />;
+            case 'footer': return <FooterSection {...props} />;
+            default: return null;
+        }
+    };
+
+    return (
+        <div className="min-h-screen w-full bg-white flex flex-col overflow-x-hidden" style={{ '--accent': storeState.themeColors.primary, '--accent-dark': storeState.themeColors.secondary, '--accent-light': storeState.themeColors.accent, fontFamily: storeState.themeColors.fontFamily || 'Cairo' }}>
+            
+            {/* الترويسة النظيفة */}
+            <div className={isImmersive ? 'absolute top-0 left-0 right-0 z-50 w-full' : 'w-full shrink-0'}>
+                {activePage?.showTopBar && storeState.headerSettings.topBarVisible && (
+                    <div className="py-2 px-6 flex items-center justify-between text-xs font-medium" style={{ backgroundColor: topBarBg, color: storeState.headerSettings.topBarTextColor }}>
+                        <div className={`flex items-center gap-3 ${storeState.headerSettings.socialPosition === 'right' ? 'order-1' : 'order-3'}`}>
+                            {storeState.headerSettings.socialLinks.map(link => link.visible && link.url && (
+                                <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={{ color: storeState.headerSettings.socialColor }}><Icon name={link.icon} size={storeState.headerSettings.socialIconSize || 15} /></a>
+                            ))}
+                        </div>
+                        <div className="flex-1 text-center order-2 px-4">{storeState.headerSettings.topBarText}</div>
+                        <div className="w-px order-2"></div>
+                    </div>
+                )}
+                <nav className="py-4 px-8 flex items-center w-full gap-4" style={{ backgroundColor: navBarBg, color: storeState.headerSettings.navTextColor, borderBottom: activePage?.headerTransparency > 20 ? 'none' : '1px solid rgba(226, 232, 240, 0.5)' }}>
+                    {storeState.headerSettings.navOrder.map(itemId => {
+                        const item = storeState.headerSettings.navItems.find(i => i.id === itemId);
+                        if (!item || !item.visible) return null;
+                        if (item.type === 'logo') return (
+                            <div key={item.id} className="flex items-center gap-2 mx-auto shrink-0">
+                                {storeState.headerSettings.logoImage && <img src={storeState.headerSettings.logoImage} alt="Logo" style={{ height: `${storeState.headerSettings.logoSize}px` }} className="object-contain" />}
+                                {storeState.headerSettings.showLogoText && <span className="font-bold font-display text-lg" style={{ color: storeState.themeColors.primary }}>{storeState.headerSettings.logo}</span>}
+                            </div>
+                        );
+                        if (item.type === 'menu' || item.type === 'search') return <button key={item.id} style={{ color: navIconColor }}><Icon name={item.type === 'menu' ? 'Menu' : 'Search'} size={storeState.headerSettings.navIconSize || 20} /></button>;
+                        if (item.type === 'cart') return <button key={item.id} className="relative" style={{ color: navIconColor }}><Icon name="ShoppingCart" size={storeState.headerSettings.navIconSize || 20} />{item.count > 0 && <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full text-white text-[9px] flex items-center justify-center font-bold" style={{ backgroundColor: storeState.themeColors.primary }}>{item.count}</span>}</button>;
+                        if (item.type === 'language') return <div key={item.id} className="text-xs font-bold border rounded-full px-2 py-0.5 opacity-80" style={{ borderColor: `${navIconColor}40`, color: navIconColor }}>العربية</div>;
+                        return null;
+                    })}
+                </nav>
+            </div>
+
+            {/* الأقسام والمحتوى النظيف */}
+            <div className="flex-1 flex flex-col w-full">
+                {heroSection && <div style={isImmersive ? { marginTop: '0' } : {}}>{renderStaticSection(heroSection)}</div>}
+                {movableSections.map(section => (
+                    <div key={section.id} className="w-full">
+                        {renderStaticSection(section)}
+                    </div>
+                ))}
+                {footerSection && <div className="mt-auto">{renderStaticSection(footerSection)}</div>}
+            </div>
+        </div>
+    );
+};
+
+// ==================== MAIN APP CONTENT ====================
 const MainAppContent = () => {
     const [state, dispatch] = useReducer(appReducer, initialState);
     const [viewport, setViewport] = useState('desktop');
@@ -1925,14 +1950,26 @@ const MainAppContent = () => {
     );
 };
 
-const App = () => (
-    <ToastProvider>
-        <MainAppContent />
-    </ToastProvider>
-);
+// ==================== APP ROUTER SELECTOR ====================
+const App = () => {
+    // فحص الرابط الحالي إذا كان يحمل طلب المعاينة الخارجية المباشرة
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreviewMode = urlParams.get('preview') === 'true';
+
+    if (isPreviewMode) {
+        // تشغيل واجهة المتجر الحرة والنظيفة تماماً
+        return <PublicStoreView />;
+    }
+
+    // تشغيل نظام الـ Editor الكامل مع الـ Toast المعتاد
+    return (
+        <ToastProvider>
+            <MainAppContent />
+        </ToastProvider>
+    );
+};
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
-
