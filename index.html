@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مُنشئ الثيمات الاحترافي V4 - المطور</title>
+    <title>مُنشئ الثيمات الاحترافي V4 - المطور المتكامل</title>
     <style>
         :root {
             --app-bg: #f4f7fa;
@@ -20,20 +20,20 @@
 
         .editor-container { width: 100%; display: flex; height: 100vh; position: relative; }
         
-        /* لوحة التحكم الجانبية */
-        .dashboard { width: 40%; background: var(--app-card-bg); border-left: 3px solid var(--app-border); padding: 20px; overflow-y: auto; transition: 0.3s ease; }
+        /* لوحة التحكم الجانبية مع خاصية الغلق السلس */
+        .dashboard { width: 40%; background: var(--app-card-bg); border-left: 3px solid var(--app-border); padding: 20px; overflow-y: auto; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease; position: relative; flex-shrink: 0; }
         .dashboard.collapsed { width: 0; padding: 0; overflow: hidden; border-left: none; }
         
-        /* منطقة الكانفاس والمعاينة */
-        .preview-pane { width: 60%; padding: 20px; display: flex; flex-direction: column; background: #e2e8f0; height: 100vh; transition: 0.3s ease; flex-grow: 1; }
+        /* زر الغلق والفتح الاحترافي على حافة العمود */
+        .dashboard-toggle-handle { position: absolute; top: 20px; left: -15px; width: 30px; height: 30px; background: var(--app-primary-dark); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 2000; font-size: 0.8rem; user-select: none; transition: transform 0.3s ease; }
+        .dashboard-toggle-handle:hover { background: #1d3557; }
 
-        .canvas-top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); gap: 10px; }
+        /* منطقة الكانفاس والمعاينة */
+        .preview-pane { width: 60%; padding: 20px; display: flex; flex-direction: column; background: #e2e8f0; height: 100vh; transition: width 0.3s ease; flex-grow: 1; position: relative; }
+
+        .canvas-top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); gap: 10px; padding-right: 25px; }
         .url-input-container { display: flex; align-items: center; gap: 8px; flex: 1; margin-left: 20px; }
         .url-input-container span { font-size: 0.85rem; font-weight: bold; color: var(--app-primary-dark); }
-        
-        /* أزرار التحكم باللوحة والمعاينة */
-        .btn-toggle-dashboard { background: #6c757d; color: white; border: none; padding: 10px 15px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-toggle-dashboard:hover { background: #495057; }
         
         .btn-preview-trigger { background: #457b9d; color: white; border: none; padding: 10px 25px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-preview-trigger:hover { background: #1d3557; }
@@ -67,47 +67,58 @@
         .footer-manager-box { background: #edf2f7; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 10px; }
         .footer-item-input-row { display: flex; gap: 5px; margin-top: 5px; align-items: center; }
 
-        /* واجهة شجرة إدارة الصفحات بأسلوب مبسط وجديد */
+        /* واجهة شجرة إدارة الصفحات */
         .page-tree-item { background: #edf2f7; border: 1px solid #cbd5e1; padding: 8px; border-radius: 6px; margin-bottom: 5px; }
         .page-tree-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; }
         .subpage-list { margin-top: 5px; padding-right: 15px; border-right: 2px dashed #cbd5e1; display: flex; flex-direction: column; gap: 4px; }
         .subpage-item { background: #fff; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
 
         /* ------------------------------------------------------------- */
-        /* تنسيقات المتجر وهيكل النفيجيشن بار الجديد */
+        /* تنسيقات المتجر وهيكل النفيجيشن بار المصلح بالكامل */
         /* ------------------------------------------------------------- */
-        #prev-promo-banner { background: #e63946; color: white; text-align: center; padding: 6px; font-size: 0.85rem; font-weight: bold; display: none; }
         
-        header { padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 10; border-bottom: 1px solid #e2e8f0; background: white; }
+        /* تعديل جوهري لمنع تداخل الهيرو فوق البانر الترويجي؛ البانر في الأعلى دائماً */
+        #prev-promo-banner { background: #e63946; color: white; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: bold; display: none; width: 100%; position: relative; z-index: 101; }
         
-        /* distribution of header elements */
+        /* حاوية تضم الهيدر والهيرو لضمان دقة التداخل الشفاف دون لمس البانر الإعلاني */
+        .header-hero-wrapper { position: relative; width: 100%; display: flex; flex-direction: column; }
+
+        header { padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 100; border-bottom: 1px solid #e2e8f0; background: white; transition: all 0.3s; }
+        
+        /* وضعيات الهيدر التداخلية الشفافة */
+        .nav-transparent { position: absolute; top: 0; left: 0; background: rgba(0, 0, 0, 0.2) !important; backdrop-filter: blur(5px); border-bottom: none !important; color: white !important; }
+        .nav-transparent .lang-btn { background: rgba(255,255,255,0.2) !important; color: white !important; border-color: white !important; }
+        .nav-transparent .burger-menu, .nav-transparent .cart-icon, .nav-transparent .search-icon { color: white !important; }
+        .nav-transparent .dropdown-menu-content a { color: #2c3e50 !important; }
+        .nav-solid { position: relative; }
+
         .header-right { display: flex; align-items: center; gap: 15px; flex: 1; justify-content: flex-start; }
         .header-center { display: flex; align-items: center; justify-content: center; flex: 1; }
         .header-left { display: flex; align-items: center; gap: 15px; flex: 1; justify-content: flex-end; }
 
-        /* burger menu and cart */
-        .burger-menu { font-size: 1.4rem; cursor: pointer; user-select: none; position: relative; }
-        .dropdown-menu-content { display: none; position: absolute; top: 30px; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 160px; z-index: 100; padding: 5px 0; }
+        .burger-menu { font-size: 1.4rem; cursor: pointer; user-select: none; position: relative; color: var(--app-text); }
+        .dropdown-menu-content { display: none; position: absolute; top: 30px; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; z-index: 1000; padding: 5px 0; }
         .dropdown-menu-content a { display: block; padding: 8px 12px; text-decoration: none; color: #2c3e50; font-size: 0.85rem; text-align: right; }
         .dropdown-menu-content a:hover { background: #f1f5f9; }
         .dropdown-menu-content a.active-link { font-weight: bold; color: #457b9d; background: #edf2f7; }
         
-        .cart-icon { font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; position: relative; }
+        .cart-icon { font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; position: relative; color: var(--app-text); }
         .cart-badge { position: absolute; top: -8px; left: -10px; background: #e63946; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.65rem; }
 
-        /* search and language */
-        .search-icon { font-size: 1.15rem; cursor: pointer; }
+        .search-icon { font-size: 1.15rem; cursor: pointer; color: var(--app-text); }
         .lang-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--app-border); background: #f8fafc; color: #457b9d; font-weight: bold; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .lang-btn:hover { background: #457b9d; color: white; }
 
-        /* logo shapes */
         .logo-original { max-height: 40px; border-radius: 0; object-fit: contain; }
         .logo-circle { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
         .logo-square-rounded { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; }
         .logo-triangle { width: 45px; height: 45px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); object-fit: cover; }
 
         #prev-hero { position: relative; background: #cbd5e1; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; transition: height 0.3s; }
-        .hero-slide { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 1; width: 100%; height: 100%; }
+        .hero-slide { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+
+        /* حاوية نصوص الهيرو مع دعم المحاذاة التلقائية */
+        .hero-text-overlay { position: absolute; color: #fff; font-weight: bold; z-index: 5; font-size: 1.1rem; background: rgba(0,0,0,0.4); padding: 6px 16px; border-radius: 4px; display: inline-block; transition: all 0.3s; }
 
         .store-body { padding: 20px; flex: 1; }
         
@@ -119,13 +130,10 @@
         .filter-chip { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; font-weight: 600; white-space: nowrap; transition: 0.2s; }
         .filter-chip.active { background: #457b9d; color: white; border-color: #457b9d; }
 
-        /* حاوية التشيك بوكس الخاصة بالفلترة الفورية التلقائية أسفل فلاتر التصنيف */
         .live-checkbox-filters-bar { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; font-size: 0.8rem; }
 
-        /* تحكم ديناميكي بعدد الأعمدة والمسافات الفاصلة الثابتة */
         .products-grid { display: grid; grid-template-columns: repeat(var(--desktop-cols, 3), 1fr); gap: 15px; }
         
-        /* بطاقة المنتج المستطيلة دائرية الأطراف */
         .product-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.08); }
         .product-img { width: 100%; height: 130px; object-fit: cover; background: #f8fafc; }
@@ -141,7 +149,7 @@
         .btn-add-to-cart:hover { background: #1d3557; }
 
         /* ------------------------------------------------------------- */
-        /* الفوتر المطور مع الخانات المتعددة الديناميكية المدمج بها روابط */
+        /* الفوتر المطور */
         /* ------------------------------------------------------------- */
         footer { padding: 20px; border-top: 1px solid #e2e8f0; margin-top: auto; font-size: 0.8rem; background: #fff; }
         .footer-cols { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; text-align: right; }
@@ -153,21 +161,22 @@
         .footer-col ul li a:hover { color: var(--app-primary-dark); text-decoration: underline; }
         .footer-bottom { text-align: center; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05); font-size: 0.7rem; opacity: 0.7; width: 100%; margin-top: 10px; }
 
-        /* نافذة ملء الشاشة للمعاينة الكبرى */
         .modal-preview { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; flex-direction: column; }
         .modal-close-bar { background: #edf2f7; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
 
-    <div class="editor-container" style="width: 100%; display: flex;">
+    <div class="editor-container">
         <div class="dashboard" id="main-dashboard-panel">
+            <div class="dashboard-toggle-handle" id="toggle-handle-btn" onclick="toggleDashboardPanel()" title="طي / فتح القائمة">◀</div>
+
             <h2>لوحة تحكم المتجر الاحترافية</h2>
             
             <div class="section-box" style="border: 2px solid var(--app-primary-dark); background: #edf6f9;">
-                <h3>📍 إدارة صفحات الموقع والكانفاس</h3>
-                <label>اختر صفحة العرض الحالية للكانفاس</label>
-                <select id="canvas-active-page" onchange="updateLiveCanvas()"></select>
+                <h3>📍 صفحة العمل والتحكم الحالية</h3>
+                <p style="font-size: 0.75rem; color: #457b9d; margin-bottom: 8px;">اختر الصفحة لتخصيص شبكتها ومحاكاة مؤشر تجربة العميل الحالية:</p>
+                <select id="canvas-active-page" onchange="switchActivePageHandle()"></select>
 
                 <div style="margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 10px; display: flex; flex-direction: column; gap: 6px;">
                     <span style="font-size: 0.8rem; font-weight: bold; color: var(--app-primary-dark);">➕ إضافة صفحة رئيسية جديدة:</span>
@@ -178,8 +187,7 @@
                 </div>
 
                 <label style="margin-top:12px; color:var(--app-primary-dark)">شجرة الصفحات والصفحات الفرعية الحالية:</label>
-                <div id="google-sites-tree-container" style="display:flex; flex-direction:column; gap:6px;">
-                    </div>
+                <div id="google-sites-tree-container" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
             <div class="section-box">
@@ -203,7 +211,16 @@
             </div>
 
             <div class="section-box">
-                <h3>2. شبكة المنتجات والربط بالتصنيف والأعمدة</h3>
+                <h3>2. سلوك النفيجيشن بار (Header Style)</h3>
+                <label>اختر مظهر شريط التنقل العلوي:</label>
+                <select id="nav-transparent-style" onchange="updateLiveCanvas()">
+                    <option value="solid">منفصل وذو لون ثيرم ثابت (Solid)</option>
+                    <option value="transparent" selected>شفاف ومتداخل مع الهيرو بانر (Transparent)</option>
+                </select>
+            </div>
+
+            <div class="section-box">
+                <h3>3. شبكة المنتجات والربط بالتصنيف والأعمدة</h3>
                 <label>تفعيل عرض شبكة منتجات بالصفحة المحددة</label>
                 <select id="prod-grid-enable" onchange="updateLiveCanvas()">
                     <option value="yes">نعم، عرض الشبكة الفعالة</option>
@@ -229,7 +246,7 @@
             </div>
 
             <div class="section-box">
-                <h3>3. حملة الخصومات وتعديل الأسعار النطاقية</h3>
+                <h3>4. حملة الخصومات وتعديل الأسعار النطاقية</h3>
                 <label>تطبيق خصم مباشر على المنتجات</label>
                 <select id="discount-active" onchange="updateLiveCanvas()">
                     <option value="active">تفعيل الخصم وعرض السعر القديم مشطوباً</option>
@@ -253,13 +270,13 @@
             </div>
 
             <div class="section-box">
-                <h3>4. تخصيص وإدارة خانات الفوتر <button class="btn-action btn-sm" onclick="addNewFooterColumn()">+ إضافة عمود فوتر</button></h3>
-                <p style="font-size:0.75rem; color:#6c757d; margin-bottom:10px;">أضف خانات كاملة وحدد لكل عنصر الاسم والرابط التوجيهي الخاص به بالضغط:</p>
+                <h3>5. تخصيص وإدارة خانات الفوتر <button class="btn-action btn-sm" onclick="addNewFooterColumn()">+ إضافة عمود فوتر</button></h3>
+                <p style="font-size:0.75rem; color:#6c757d; margin-bottom:10px;">أضف خانات كاملة وحدد الاسم والرابط التوجيهي لكل عنصر بالضغط:</p>
                 <div id="footer-dynamic-manager-zone"></div>
             </div>
 
             <div class="section-box">
-                <h3>5. الثيم ولوحة الألوان</h3>
+                <h3>6. الثيم ولوحة الألوان</h3>
                 <select id="theme-select" onchange="toggleColorPaletteOptions(); updateLiveCanvas();" style="margin-bottom:10px;">
                     <option value="modern">ثيم مودرن (عصري)</option>
                     <option value="classic">ثيم كلاسيك (هادئ)</option>
@@ -276,29 +293,48 @@
                 </div>
             </div>
 
-            <div class="section-box">
-                <h3>6. الهيكل وإدارة الصفحات والبانر</h3>
-                <label>ارتفاع الهيرو بانر</label>
-                <input type="range" id="hero-height" min="120" max="350" value="220" oninput="updateLiveCanvas()">
+            <div class="section-box" style="border: 2px solid #2a9d8f; background: #f0fdf4;">
+                <h3>7. التخصيص المتقدم للهيرو والبانر الحالي</h3>
+                <p style="font-size: 0.75rem; color:#2b6cb0; margin-bottom:8px;">تحكم مطلق وبشكل مستقل تماماً في الصفحة المحددة حالياً:</p>
                 
-                <label>نطاق ظهور وتفعيل البانر الترويجي</label>
-                <select id="promo-display-scope" onchange="updateLiveCanvas()">
-                    <option value="all_pages">إظهار في كل صفحات الموقع بالكامل</option>
-                    <option value="only_current">إظهار في صفحة العمل والتحكم الحالية فقط</option>
-                    <option value="disabled">تعطيل البانر الترويجي تماماً</option>
+                <label>ارتفاع الهيرو بانر لهذه الصفحة (بكسل)</label>
+                <input type="range" id="page-specific-hero-height" min="120" max="380" value="220" oninput="saveCurrentPageSettings(); updateLiveCanvas();">
+                
+                <label>رابط ميديا الهيرو لهذه الصفحة (صورة/فيديو)</label>
+                <input type="text" id="page-specific-hero-media" value="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80" oninput="saveCurrentPageSettings(); updateLiveCanvas();">
+
+                <label>محاذاة عنوان ونص الهيرو بانر</label>
+                <select id="page-specific-hero-align" onchange="saveCurrentPageSettings(); updateLiveCanvas();">
+                    <option value="right" selected>👉 يمين الصفحة</option>
+                    <option value="center">↕️ في المنتصف تماماً</option>
+                    <option value="left">👈 يسار الصفحة</option>
                 </select>
-                <input type="text" id="promo-text" value="خصومات حصرية لفترة محدودة 🥧" oninput="updateLiveCanvas()">
-                
-                <div id="hero-media-list" style="display:none;">
-                    <input type="text" class="hero-media-input" value="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80">
+
+                <div style="margin-top:10px; border-top:1px dashed #2a9d8f; padding-top:8px;">
+                    <label>نطاق وتفعيل ظهور البانر الترويجي العلوي</label>
+                    <select id="promo-display-scope" onchange="saveCurrentPageSettings(); updateLiveCanvas()">
+                        <option value="all_pages">إظهار البانر في كل صفحات الموقع بالكامل</option>
+                        <option value="only_current">إظهار البانر في هذه الصفحة المحددة فقط</option>
+                        <option value="disabled">تعطيل وإخفاء البانر الترويجي تماماً</option>
+                    </select>
+                    <input type="text" id="promo-text" value="خصومات حصرية لفترة محدودة 🥧" oninput="saveCurrentPageSettings(); updateLiveCanvas()">
+
+                    <div class="color-pickers" style="margin-top:8px;">
+                        <div class="color-field">
+                            <span style="font-size:0.7rem;">خلفية البانر</span>
+                            <input type="color" id="page-specific-promo-bg" value="#e63946" onchange="saveCurrentPageSettings(); updateLiveCanvas();">
+                        </div>
+                        <div class="color-field">
+                            <span style="font-size:0.7rem;">خط البانر</span>
+                            <input type="color" id="page-specific-promo-color" value="#ffffff" onchange="saveCurrentPageSettings(); updateLiveCanvas();">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="preview-pane" id="main-preview-pane">
             <div class="canvas-top-bar">
-                <button class="btn-toggle-dashboard" onclick="toggleDashboardPanel()" title="فتح/غلق عمود الإعدادات">📁 لوحة التحكم</button>
-                
                 <div class="url-input-container">
                     <span>الرابط الأساسي للموقع:</span>
                     <input type="text" id="base-url" value="https://sweetdelights-store.com">
@@ -311,29 +347,31 @@
             <div class="canvas-frame" id="canvas-store-zone">
                 <div id="prev-promo-banner">تنبيه ترويجي</div>
                 
-                <header id="prev-header">
-                    <div class="header-right">
-                        <div class="burger-menu" onclick="toggleBurgerMenu(event)">
-                            ☰
-                            <div class="dropdown-menu-content" id="burger-dropdown"></div>
+                <div class="header-hero-wrapper">
+                    <header id="prev-header">
+                        <div class="header-right">
+                            <div class="burger-menu" onclick="toggleBurgerMenu(event)">
+                                ☰
+                                <div class="dropdown-menu-content" id="burger-dropdown"></div>
+                            </div>
+                            <div class="cart-icon">🛒 <span class="cart-badge">٠</span></div>
                         </div>
-                        <div class="cart-icon">🛒 <span class="cart-badge">٠</span></div>
-                    </div>
-                    
-                    <div class="header-center">
-                        <img id="prev-logo" class="logo-original" src="" alt="شعار">
-                        <span id="prev-store-title" style="font-weight: bold; font-size: 1rem; margin-right:8px; display:none;"></span>
-                    </div>
-                    
-                    <div class="header-left">
-                        <div class="search-icon">🔍</div>
-                        <button class="lang-btn" onclick="alert('محاكاة تحويل اللغة...')">En</button>
-                    </div>
-                </header>
+                        
+                        <div class="header-center">
+                            <img id="prev-logo" class="logo-original" src="" alt="شعار">
+                            <span id="prev-store-title" style="font-weight: bold; font-size: 1rem; margin-right:8px; display:none;"></span>
+                        </div>
+                        
+                        <div class="header-left">
+                            <div class="search-icon">🔍</div>
+                            <button class="lang-btn">En</button>
+                        </div>
+                    </header>
 
-                <div id="prev-hero">
-                    <img class="hero-slide" src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80" alt="Hero Image">
-                    <div style="position:absolute; color:#fff; font-weight:bold; z-index:5; font-size:1.1rem; background:rgba(0,0,0,0.4); padding:4px 12px; border-radius:4px;" id="canvas-hero-indicator-text">الرئيسية</div>
+                    <div id="prev-hero">
+                        <img class="hero-slide" id="prev-hero-img-element" src="" alt="Hero Image">
+                        <div class="hero-text-overlay" id="canvas-hero-indicator-text">الرئيسية</div>
+                    </div>
                 </div>
 
                 <div class="store-body">
@@ -370,7 +408,6 @@
     </div>
 
     <script>
-        // قاعدة بيانات المنتجات المدمجة للمحاكاة الذكية حسب التصنيف
         const productsData = {
             desserts: {
                 title: 'الحلويات والشرقي',
@@ -392,24 +429,23 @@
             }
         };
 
-        // هيكل مصفوفة الصفحات المتقدمة المعتمد لأسلوب جوجل سايتس (الرئيسية والفرعية بشكل شجري)
+        // مصفوفة إدارة الصفحات الشجرية بأسلوب جوجل سايتس مع ميزات الحفظ المنفصل للميديا والألوان
         let googleSitesPages = [
-            { id: 'p_1', title: 'الرئيسية', subpages: [] },
-            { id: 'p_2', title: 'قائمة المنتجات', subpages: [] },
-            { id: 'p_3', title: 'من نحن', subpages: ['قصتنا والافتتاح', 'رؤيتنا المستقبيلية'] },
-            { id: 'p_4', title: 'اتصل بنا', subpages: ['الدعم الفني والواتس'] }
+            { id: 'p_1', title: 'الرئيسية', subpages: [], heroHeight: 220, heroMedia: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', textAlign: 'center', promoBg: '#e63946', promoColor: '#ffffff', promoScope: 'all_pages', promoText: 'خصومات حصرية لفترة محدودة 🥧' },
+            { id: 'p_2', title: 'قائمة المنتجات', subpages: [], heroHeight: 180, heroMedia: 'https://images.unsplash.com/photo-1511018556340-d16986a1c194?w=800&q=80', textAlign: 'right', promoBg: '#2a9d8f', promoColor: '#ffffff', promoScope: 'all_pages', promoText: 'شحن مجاني لكافة المنتجات المعروضة اليوم 🎉' },
+            { id: 'p_3', title: 'من نحن', subpages: ['قصتنا والافتتاح'], heroHeight: 200, heroMedia: 'https://images.unsplash.com/photo-1548365328-8c6db3220e4c?w=800&q=80', textAlign: 'center', promoBg: '#457b9d', promoColor: '#ffffff', promoScope: 'only_current', promoText: 'تعرف على قصة تأسيس مخابزنا الفاخرة ✨' },
+            { id: 'p_4', title: 'اتصل بنا', subpages: [], heroHeight: 160, heroMedia: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=800&q=80', textAlign: 'left', promoBg: '#f4a261', promoColor: '#2c3e50', promoScope: 'all_pages', promoText: 'خدمة العملاء متوفرة على مدار ٢٤ ساعة 📞' }
         ];
 
-        // مصفوفة إدارة بيانات الفوتر المحدثة لتدعم كائنات الروابط المضمنة القابلة للضغط والتوجيه
         let footerColumnsData = [
             { id: 'f_col_1', title: 'روابط سريعة', items: [{ text: 'الرئيسية', url: '#home' }, { text: 'جميع المنتجات', url: '#shop' }] },
             { id: 'f_col_2', title: 'من نحن', items: [{ text: 'قصتنا', url: '#about' }, { text: 'الفروع', url: '#branches' }] },
-            { id: 'f_col_3', title: 'تواصل معنا', items: [{ text: '01023456789 (whatsapp)', url: 'https://wa.me/201023456789' }, { text: 'تيليجرام الدعم الفني', url: 'https://t.me/sweet_support' }] }
+            { id: 'f_col_3', title: 'تواصل معنا', items: [{ text: '01023456789 (whatsapp)', url: 'https://wa.me/201023456789' }, { text: 'تيليجرام الدعم', url: 'https://t.me/sweet_support' }] }
         ];
 
         const preMadePalettes = {
-            modern: { name: 'باستيل سماوي ناعم', primary: '#457b9d', text: '#ffffff', bg: '#f8fafc' },
-            classic: { name: 'فخامة الشوكولاتة والكراميل', primary: '#6c584c', text: '#ffffff', bg: '#fbf8f5' }
+            modern: [{ name: 'باستيل سماوي ناعم', primary: '#457b9d', text: '#ffffff', bg: '#f8fafc' }],
+            classic: [{ name: 'فخامة الشوكولاتة والكراميل', primary: '#6c584c', text: '#ffffff', bg: '#fbf8f5' }]
         };
 
         window.onload = function() {
@@ -417,153 +453,149 @@
             handleMainCatChange();
             renderFooterDynamicControls();
             rebuildGoogleSitesTreeUI();
+            loadCurrentPageSettingsToInputs(); 
             updateLiveCanvas();
             
-            document.addEventListener('click', function() {
-                document.getElementById('burger-dropdown').style.display = 'none';
-            });
+            document.addEventListener('click', () => { document.getElementById('burger-dropdown').style.display = 'none'; });
         };
 
-        // دالة فتح وغلق عمود الإعدادات الذي على اليمين بالتبادل للتحكم الكامل بالمساحة
         function toggleDashboardPanel() {
             const dashboard = document.getElementById('main-dashboard-panel');
+            const handleBtn = document.getElementById('toggle-handle-btn');
             dashboard.classList.toggle('collapsed');
-        }
-
-        // منطق Google Sites المطور: إضافة صفحة رئيسية جديدة
-        function addGoogleSitesMainPage() {
-            const input = document.getElementById('sites-new-main-page-title');
-            const title = input.value.trim();
-            if(!title) return;
-            
-            googleSitesPages.push({ id: 'p_' + Date.now(), title: title, subpages: [] });
-            input.value = '';
-            rebuildGoogleSitesTreeUI();
-            updateLiveCanvas();
-        }
-
-        // منطق Google Sites المطور: إضافة صفحة فرعية لصفحة معينة عبر الـ Prompt عند الضغط على +
-        function addGoogleSitesSubpage(pageId) {
-            const subTitle = prompt('أدخل اسم الصفحة الفرعية الجديدة:');
-            if(!subTitle || !subTitle.trim()) return;
-
-            const page = googleSitesPages.find(p => p.id === pageId);
-            if(page) {
-                page.subpages.push(subTitle.trim());
-                rebuildGoogleSitesTreeUI();
-                updateLiveCanvas();
+            if(dashboard.classList.contains('collapsed')) {
+                handleBtn.innerText = '▶'; handleBtn.style.transform = 'translateX(15px)';
+            } else {
+                handleBtn.innerText = '◀'; handleBtn.style.transform = 'translateX(0px)';
             }
         }
 
-        // منطق Google Sites المطور: حذف صفحة رئيسية بالكامل
-        function removeGoogleSitesMainPage(pageId) {
-            googleSitesPages = googleSitesPages.filter(p => p.id !== pageId);
-            rebuildGoogleSitesTreeUI();
+        // حفظ تفاصيل وخصائص البانر والارتفاع والمحاذاة المتقدمة لكل صفحة
+        function saveCurrentPageSettings() {
+            const activeTitle = document.getElementById('canvas-active-page').value;
+            const hValue = parseInt(document.getElementById('page-specific-hero-height').value);
+            const mValue = document.getElementById('page-specific-hero-media').value.trim();
+            const alignValue = document.getElementById('page-specific-hero-align').value;
+            
+            const promoScopeVal = document.getElementById('promo-display-scope').value;
+            const promoTextVal = document.getElementById('promo-text').value;
+            const pBg = document.getElementById('page-specific-promo-bg').value;
+            const pColor = document.getElementById('page-specific-promo-color').value;
+
+            let found = googleSitesPages.find(p => p.title === activeTitle);
+            if(found) {
+                found.heroHeight = hValue; found.heroMedia = mValue; found.textAlign = alignValue;
+                found.promoScope = promoScopeVal; found.promoText = promoTextVal; found.promoBg = pBg; found.promoColor = pColor;
+                return;
+            }
+
+            googleSitesPages.forEach(p => {
+                if(p.subpages.includes(activeTitle)) {
+                    if(!p.subpageSettings) p.subpageSettings = {};
+                    p.subpageSettings[activeTitle] = { heroHeight: hValue, heroMedia: mValue, textAlign: alignValue, promoScope: promoScopeVal, promoText: promoTextVal, promoBg: pBg, promoColor: pColor };
+                }
+            });
+        }
+
+        // تحميل وجلب الخصائص المتقدمة والمحاذات المحفوظة للصفحة عند التبديل
+        function loadCurrentPageSettingsToInputs() {
+            const activeTitle = document.getElementById('canvas-active-page').value || 'الرئيسية';
+            let hHeight = 220, hMedia = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', hAlign = 'center';
+            let pScope = 'all_pages', pText = 'خصومات حصرية لفترة محدودة 🥧', pBg = '#e63946', pColor = '#ffffff';
+
+            let found = googleSitesPages.find(p => p.title === activeTitle);
+            if(found) {
+                hHeight = found.heroHeight || 220; hMedia = found.heroMedia || hMedia; hAlign = found.textAlign || 'center';
+                pScope = found.promoScope || pScope; pText = found.promoText || pText; pBg = found.promoBg || pBg; pColor = found.promoColor || pColor;
+            } else {
+                googleSitesPages.forEach(p => {
+                    if(p.subpages.includes(activeTitle) && p.subpageSettings && p.subpageSettings[activeTitle]) {
+                        let subData = p.subpageSettings[activeTitle];
+                        hHeight = subData.heroHeight || 200; hMedia = subData.heroMedia || hMedia; hAlign = subData.textAlign || 'center';
+                        pScope = subData.promoScope || pScope; pText = subData.promoText || pText; pBg = subData.promoBg || pBg; pColor = subData.promoColor || pColor;
+                    }
+                });
+            }
+
+            document.getElementById('page-specific-hero-height').value = hHeight;
+            document.getElementById('page-specific-hero-media').value = hMedia;
+            document.getElementById('page-specific-hero-align').value = hAlign;
+            document.getElementById('promo-display-scope').value = pScope;
+            document.getElementById('promo-text').value = pText;
+            document.getElementById('page-specific-promo-bg').value = pBg;
+            document.getElementById('page-specific-promo-color').value = pColor;
+        }
+
+        function switchActivePageHandle() {
+            loadCurrentPageSettingsToInputs();
             updateLiveCanvas();
         }
 
-        // منطق Google Sites المطور: حذف صفحة فرعية معينة
+        function addGoogleSitesMainPage() {
+            const input = document.getElementById('sites-new-main-page-title'); const title = input.value.trim(); if(!title) return;
+            googleSitesPages.push({ id: 'p_' + Date.now(), title: title, subpages: [], heroHeight: 220, heroMedia: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', textAlign: 'center', promoBg: '#e63946', promoColor: '#ffffff', promoScope: 'all_pages', promoText: 'خصومات لفترة محدودة 🥧' });
+            input.value = ''; rebuildGoogleSitesTreeUI(); switchActivePageHandle();
+        }
+
+        function addGoogleSitesSubpage(pageId) {
+            const subTitle = prompt('أدخل اسم الصفحة الفرعية الجديدة لربطها شجرياً:'); if(!subTitle || !subTitle.trim()) return;
+            const page = googleSitesPages.find(p => p.id === pageId);
+            if(page) { page.subpages.push(subTitle.trim()); rebuildGoogleSitesTreeUI(); switchActivePageHandle(); }
+        }
+
+        function removeGoogleSitesMainPage(pageId) { googleSitesPages = googleSitesPages.filter(p => p.id !== pageId); rebuildGoogleSitesTreeUI(); switchActivePageHandle(); }
+        
         function removeGoogleSitesSubpage(pageId, subIdx) {
             const page = googleSitesPages.find(p => p.id === pageId);
-            if(page) {
-                page.subpages.splice(subIdx, 1);
-                rebuildGoogleSitesTreeUI();
-                updateLiveCanvas();
-            }
+            if(page) { page.subpages.splice(subIdx, 1); rebuildGoogleSitesTreeUI(); switchActivePageHandle(); }
         }
 
-        // إعادة بناء وتحديث واجهة شجرة الصفحات وإضافتها بداخل محدد الكانفاس والمحاكي
         function rebuildGoogleSitesTreeUI() {
             const treeContainer = document.getElementById('google-sites-tree-container');
             const canvasSelect = document.getElementById('canvas-active-page');
-            
             const savedVal = canvasSelect.value;
-            treeContainer.innerHTML = '';
-            canvasSelect.innerHTML = '';
+            treeContainer.innerHTML = ''; canvasSelect.innerHTML = '';
 
             googleSitesPages.forEach(page => {
-                // 1. ملء واجهة لوحة التحكم الشجرية
-                let pBox = document.createElement('div');
-                pBox.className = 'page-tree-item';
-                
+                let pBox = document.createElement('div'); pBox.className = 'page-tree-item';
                 let subsHTML = '';
                 page.subpages.forEach((sub, subIdx) => {
-                    subsHTML += `
-                        <div class="subpage-item">
-                            <span>↳ 📂 ${sub}</span>
-                            <button style="background:none; border:none; color:#e53e3e; cursor:pointer;" onclick="removeGoogleSitesSubpage('${page.id}', ${subIdx})">🗑️</button>
-                        </div>
-                    `;
+                    subsHTML += `<div class="subpage-item"><span>↳ 📂 ${sub}</span><button style="background:none; border:none; color:#e53e3e; cursor:pointer;" onclick="removeGoogleSitesSubpage('${page.id}', ${subIdx})">🗑️</button></div>`;
                 });
-
                 pBox.innerHTML = `
-                    <div class="page-tree-header">
-                        <span>📄 ${page.title}</span>
+                    <div class="page-tree-header"><span>📄 ${page.title}</span>
                         <div style="display:flex; gap:5px;">
-                            <button class="btn-action btn-sm" style="background:#2a9d8f; padding:2px 6px;" onclick="addGoogleSitesSubpage('${page.id}')" title="إضافة صفحة فرعية تحت هذه الصفحة">+</button>
+                            <button class="btn-action btn-sm" style="background:#2a9d8f; padding:2px 6px;" onclick="addGoogleSitesSubpage('${page.id}')">+</button>
                             <button class="btn-action btn-sm btn-danger" style="padding:2px 6px;" onclick="removeGoogleSitesMainPage('${page.id}')">🗑️</button>
                         </div>
-                    </div>
-                    <div class="subpage-list">${subsHTML}</div>
-                `;
+                    </div><div class="subpage-list">${subsHTML}</div>`;
                 treeContainer.appendChild(pBox);
 
-                // 2. ملء محدد الكانفاس التفاعلي بالصفحات الرئيسية
-                let opt = document.createElement('option');
-                opt.value = page.title;
-                opt.innerText = `📄 ${page.title}`;
-                canvasSelect.appendChild(opt);
-
-                // ملء محدد الكانفاس التفاعلي بالصفحات الفرعية التابعة لها
+                let opt = document.createElement('option'); opt.value = page.title; opt.innerText = `📄 ${page.title}`; canvasSelect.appendChild(opt);
                 page.subpages.forEach(sub => {
-                    let sOpt = document.createElement('option');
-                    sOpt.value = sub;
-                    sOpt.innerText = `↳ 📂 ${sub}`;
-                    canvasSelect.appendChild(sOpt);
+                    let sOpt = document.createElement('option'); sOpt.value = sub; sOpt.innerText = `↳ 📂 ${sub}`; canvasSelect.appendChild(sOpt);
                 });
             });
-
-            if([...canvasSelect.options].some(o => o.value === savedVal)) {
-                canvasSelect.value = savedVal;
-            }
-        }
-
-        function toggleBurgerMenu(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('burger-dropdown');
-            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+            if([...canvasSelect.options].some(o => o.value === savedVal)) canvasSelect.value = savedVal;
         }
 
         function handleMainCatChange() {
             const mainCat = document.getElementById('main-cat-select').value;
-            const subSelect = document.getElementById('sub-cat-select');
-            subSelect.innerHTML = '';
-            
+            const subSelect = document.getElementById('sub-cat-select'); subSelect.innerHTML = '';
             if(mainCat === 'all_cats') {
-                let opt = document.createElement('option');
-                opt.value = 'all_subs'; opt.innerText = '✨ الكل (جميع الأصناف الفرعية)';
-                subSelect.appendChild(opt);
+                let opt = document.createElement('option'); opt.value = 'all_subs'; opt.innerText = '✨ الكل (جميع الأصناف الفرعية)'; subSelect.appendChild(opt);
             } else {
-                let optAll = document.createElement('option');
-                optAll.value = 'all_subs'; optAll.innerText = '✨ الكل (عرض كل الفرعي)';
-                subSelect.appendChild(optAll);
-
+                let optAll = document.createElement('option'); optAll.value = 'all_subs'; optAll.innerText = '✨ الكل (عرض كل الفرعي)'; subSelect.appendChild(optAll);
                 productsData[mainCat].subcats.forEach(sub => {
-                    let opt = document.createElement('option');
-                    opt.value = sub; opt.innerText = sub;
-                    subSelect.appendChild(opt);
+                    let opt = document.createElement('option'); opt.value = sub; opt.innerText = sub; subSelect.appendChild(opt);
                 });
             }
         }
 
         function toggleColorPaletteOptions() {
             const theme = document.getElementById('theme-select').value;
-            const select = document.getElementById('color-palette-select');
-            select.innerHTML = '';
-            
-            let opt = document.createElement('option');
-            opt.value = 0; opt.innerText = preMadePalettes[theme].name;
-            select.appendChild(opt);
+            const select = document.getElementById('color-palette-select'); select.innerHTML = '';
+            let opt = document.createElement('option'); opt.value = 0; opt.innerText = preMadePalettes[theme].name; select.appendChild(opt);
         }
 
         function toggleCustomColors() {
@@ -585,80 +617,51 @@
             return '🔗 ';
         }
 
-        /* ------------------------------------------------------------- */
-        /* توابع التحكم الديناميكي لفوتر الموقع المطور مع الروابط القابلة للضغط */
-        /* ------------------------------------------------------------- */
         function renderFooterDynamicControls() {
-            const container = document.getElementById('footer-dynamic-manager-zone');
-            container.innerHTML = '';
-
+            const container = document.getElementById('footer-dynamic-manager-zone'); container.innerHTML = '';
             footerColumnsData.forEach((col, colIdx) => {
-                let box = document.createElement('div');
-                box.className = 'footer-manager-box';
+                let box = document.createElement('div'); box.className = 'footer-manager-box';
                 box.innerHTML = `
                     <div style="display:flex; gap:5px; margin-bottom:5px;">
                         <input type="text" value="${col.title}" style="font-weight:bold;" oninput="footerColumnsData[${colIdx}].title=this.value; updateLiveCanvas();">
                         <button class="btn-action btn-sm btn-danger" onclick="removeFooterColumn('${col.id}')">حذف</button>
-                    </div>
-                    <div id="items-rows-${col.id}"></div>
-                    <button class="btn-action btn-sm" style="background:#2a9d8f; margin-top:5px;" onclick="addFooterItemToColumn(${colIdx})">+ إضافة عنصر برابط</button>
-                `;
+                    </div><div id="items-rows-${col.id}"></div>
+                    <button class="btn-action btn-sm" style="background:#2a9d8f; margin-top:5px;" onclick="addFooterItemToColumn(${colIdx})">+ إضافة عنصر برابط</button>`;
                 container.appendChild(box);
 
                 let itemsContainer = box.querySelector(`#items-rows-${col.id}`);
                 col.items.forEach((item, itemIdx) => {
-                    let row = document.createElement('div');
-                    row.className = 'footer-item-input-row';
+                    let row = document.createElement('div'); row.className = 'footer-item-input-row';
                     row.innerHTML = `
-                        <input type="text" value="${item.text}" style="padding:4px; flex:1;" oninput="footerColumnsData[${colIdx}].items[${itemIdx}].text=this.value; updateLiveCanvas();" placeholder="اسم النص">
-                        <input type="text" value="${item.url}" style="padding:4px; flex:1; direction:ltr;" oninput="footerColumnsData[${colIdx}].items[${itemIdx}].url=this.value; updateLiveCanvas();" placeholder="الرابط المضمن">
-                        <button class="btn-action btn-sm btn-danger" style="padding:2px 5px;" onclick="removeFooterItemFromColumn(${colIdx}, ${itemIdx})">🗑️</button>
-                    `;
+                        <input type="text" value="${item.text}" style="padding:4px; flex:1;" oninput="footerColumnsData[${colIdx}].items[${itemIdx}].text=this.value; updateLiveCanvas();" placeholder="النص">
+                        <input type="text" value="${item.url}" style="padding:4px; flex:1; direction:ltr;" oninput="footerColumnsData[${colIdx}].items[${itemIdx}].url=this.value; updateLiveCanvas();" placeholder="الرابط">
+                        <button class="btn-action btn-sm btn-danger" style="padding:2px 5px;" onclick="removeFooterItemFromColumn(${colIdx}, ${itemIdx})">🗑️</button>`;
                     itemsContainer.appendChild(row);
                 });
             });
         }
 
         function addNewFooterColumn() {
-            const id = 'f_col_' + Date.now();
-            footerColumnsData.push({ id: id, title: 'عنوان جديد', items: [{ text: 'نص الرابط', url: '#link' }] });
-            renderFooterDynamicControls();
-            updateLiveCanvas();
+            const id = 'f_col_' + Date.now(); footerColumnsData.push({ id: id, title: 'عنوان جديد', items: [{ text: 'نص الرابط', url: '#link' }] });
+            renderFooterDynamicControls(); updateLiveCanvas();
         }
+        function removeFooterColumn(id) { footerColumnsData = footerColumnsData.filter(c => c.id !== id); renderFooterDynamicControls(); updateLiveCanvas(); }
+        function addFooterItemToColumn(colIdx) { footerColumnsData[colIdx].items.push({ text: 'عنصر جديد', url: '#url' }); renderFooterDynamicControls(); updateLiveCanvas(); }
+        function removeFooterItemFromColumn(colIdx, itemIdx) { footerColumnsData[colIdx].items.splice(itemIdx, 1); renderFooterDynamicControls(); updateLiveCanvas(); }
 
-        function removeFooterColumn(id) {
-            footerColumnsData = footerColumnsData.filter(c => c.id !== id);
-            renderFooterDynamicControls();
-            updateLiveCanvas();
-        }
-
-        function addFooterItemToColumn(colIdx) {
-            footerColumnsData[colIdx].items.push({ text: 'عنصر جديد', url: '#url' });
-            renderFooterDynamicControls();
-            updateLiveCanvas();
-        }
-
-        function removeFooterItemFromColumn(colIdx, itemIdx) {
-            footerColumnsData[colIdx].items.splice(itemIdx, 1);
-            renderFooterDynamicControls();
-            updateLiveCanvas();
-        }
-
-        // دالة التحديث اللحظي للكانفاس لربط وتطبيق التعديلات والخصومات والفوتر
+        // دالة التحديث الشاملة واللحظية للكانفاس لربط وتطبيق التعديلات والشفافية والتخصيص المطور
         function updateLiveCanvas() {
             // أ. الهوية والشعار
             const logo = document.getElementById('prev-logo');
-            logo.src = document.getElementById('logo-url').value;
-            logo.className = document.getElementById('logo-shape').value;
+            logo.src = document.getElementById('logo-url').value; logo.className = document.getElementById('logo-shape').value;
             document.getElementById('footer-store-name').innerText = document.getElementById('store-name').value;
 
-            // ب. الألوان
+            // ب. الألوان والثيرم
             const isCustomColor = document.getElementById('custom-color-trigger').checked;
             let finalPrimary, finalText, finalBg;
             if (isCustomColor) {
                 finalPrimary = document.getElementById('custom-primary').value;
-                finalText = document.getElementById('custom-text').value;
-                finalBg = document.getElementById('custom-bg').value;
+                finalText = document.getElementById('custom-text').value; finalBg = document.getElementById('custom-bg').value;
             } else {
                 const theme = document.getElementById('theme-select').value;
                 const palette = preMadePalettes[theme];
@@ -670,64 +673,86 @@
             canvasZone.style.backgroundColor = finalBg;
             footer.style.backgroundColor = finalPrimary; footer.style.color = finalText;
 
-            // ج. بناء البرجر منيو بجميع الصفحات والفرعيات المضافة بنظام شجرة الصفحات الجديدة
+            // ج. بناء البرجر منيو بجميع الصفحات والفرعيات
             const activePage = document.getElementById('canvas-active-page').value || 'الرئيسية';
             document.getElementById('prev-page-title-display').innerText = activePage;
-            document.getElementById('canvas-hero-indicator-text').innerText = `أنت في صفحة: ${activePage} 📍`;
+            
+            // تطبيق المحاذاة المخصصة للعنوان بداخل الهيرو بانر
+            const textOverlay = document.getElementById('canvas-hero-indicator-text');
+            textOverlay.innerText = `صفحة: ${activePage} 📍`;
+            
+            const alignMode = document.getElementById('page-specific-hero-align').value;
+            if(alignMode === 'center') {
+                textOverlay.style.left = '50%'; textOverlay.style.transform = 'translateX(-50%)'; textOverlay.style.right = 'auto';
+            } else if(alignMode === 'left') {
+                textOverlay.style.left = '20px'; textOverlay.style.transform = 'none'; textOverlay.style.right = 'auto';
+            } else {
+                textOverlay.style.right = '20px'; textOverlay.style.transform = 'none'; textOverlay.style.left = 'auto';
+            }
 
-            const burgerDropdown = document.getElementById('burger-dropdown');
-            burgerDropdown.innerHTML = '';
+            const burgerDropdown = document.getElementById('burger-dropdown'); burgerDropdown.innerHTML = '';
             googleSitesPages.forEach(p => {
                 const activeClass = (p.title === activePage) ? 'class="active-link"' : '';
-                burgerDropdown.innerHTML += `<a href="#" ${activeClass} onclick="document.getElementById('canvas-active-page').value='${p.title}'; updateLiveCanvas();">${p.title}</a>`;
-                
+                burgerDropdown.innerHTML += `<a href="#" ${activeClass} onclick="document.getElementById('canvas-active-page').value='${p.title}'; switchActivePageHandle();">${p.title}</a>`;
                 p.subpages.forEach(sub => {
                     const subActiveClass = (sub === activePage) ? 'class="active-link"' : '';
-                    burgerDropdown.innerHTML += `<a href="#" ${subActiveClass} style="padding-right:20px;" onclick="document.getElementById('canvas-active-page').value='${sub}'; updateLiveCanvas();">↳ 📂 ${sub}</a>`;
+                    burgerDropdown.innerHTML += `<a href="#" ${subActiveClass} style="padding-right:20px;" onclick="document.getElementById('canvas-active-page').value='${sub}'; switchActivePageHandle();">↳ 📂 ${sub}</a>`;
                 });
             });
 
-            // د. رندرة خانات وأعمدة الفوتر بالروابط والوسوم المضمنة الحقيقية القابلة للضغط والتوجيه `<a>`
-            const footerColsZone = document.getElementById('prev-footer-cols-render');
-            footerColsZone.innerHTML = '';
+            // د. رندرة ميزة الشفافية والتداخل للنفيجيشن بار
+            const navStyleMode = document.getElementById('nav-transparent-style').value;
+            const headerElement = document.getElementById('prev-header');
+            if(navStyleMode === 'transparent') {
+                headerElement.className = 'nav-transparent'; headerElement.style.backgroundColor = ''; headerElement.style.color = 'white';
+            } else {
+                headerElement.className = 'nav-solid'; headerElement.style.backgroundColor = finalPrimary; headerElement.style.color = finalText;
+            }
+
+            // هـ. رندرة الفوتر متعدد الخانات الديناميكي بالروابط القابلة للتوجيه والضغط والتحويل التلقائي للأيقونات
+            const footerColsZone = document.getElementById('prev-footer-cols-render'); footerColsZone.innerHTML = '';
             footerColumnsData.forEach(col => {
                 let itemsListHTML = '';
                 col.items.forEach(it => { 
                     let icon = getSocialIcon(it.text + ' ' + it.url);
                     itemsListHTML += `<li><span>${icon}</span><a href="${it.url}" target="_blank">${it.text}</a></li>`; 
                 });
-                footerColsZone.innerHTML += `
-                    <div class="footer-col">
-                        <h4>${col.title}</h4>
-                        <ul>${itemsListHTML}</ul>
-                    </div>
-                `;
+                footerColsZone.innerHTML += `<div class="footer-col"><h4>${col.title}</h4><ul>${itemsListHTML}</ul></div>`;
             });
 
-            // هـ. إظهار الهيرو بانر بشكل دائم ومباشر على الكانفاس ليعكس الارتفاع والتغييرات فوراً
+            // و. معالجة وعرض الهيرو بانر المخصص لكل صفحة والمستدام على الكانفاس بانتظام في كافه الصفحات والفرعيات
             const heroPanel = document.getElementById('prev-hero');
-            heroPanel.style.height = document.getElementById('hero-height').value + 'px';
+            const heroImgElement = document.getElementById('prev-hero-img-element');
+            
+            const currentHeroHeight = document.getElementById('page-specific-hero-height').value;
+            const currentHeroMedia = document.getElementById('page-specific-hero-media').value;
+            
+            heroPanel.style.height = currentHeroHeight + 'px';
+            heroImgElement.src = currentHeroMedia;
 
-            // و. التحكم الدقيق في ظهور ونطاق البانر الترويجي في كل الصفحات أو صفحة معينة
+            // ز. معالجة وتلوين ونطاق ظهور البانر الترويجي العلوي (مصلح هندسياً ومنطقياً ليكون في القمة بلا حجب)
             const promoScope = document.getElementById('promo-display-scope').value;
             const promoBanner = document.getElementById('prev-promo-banner');
             
+            // تطبيق الألوان المخصصة لكل صفحة على البانر الترويجي
+            promoBanner.style.backgroundColor = document.getElementById('page-specific-promo-bg').value;
+            promoBanner.style.color = document.getElementById('page-specific-promo-color').value;
+
             if(promoScope === 'all_pages') {
                 promoBanner.style.display = 'block'; promoBanner.innerText = document.getElementById('promo-text').value;
-            } else if(promoScope === 'only_current' && activePage === 'الرئيسية') {
+            } else if(promoScope === 'only_current') {
                 promoBanner.style.display = 'block'; promoBanner.innerText = document.getElementById('promo-text').value;
             } else {
                 promoBanner.style.display = 'none';
             }
 
-            // ز. رندرة وتوزيع محتوى شبكة المنتجات
+            // ح. رندرة وتوزيع محتوى شبكة المنتجات
             const liveSection = document.getElementById('live-product-section');
             const staticSection = document.getElementById('static-page-content-box');
 
             if(activePage !== 'الرئيسية' && activePage !== 'قائمة المنتجات') {
-                liveSection.style.display = 'none';
-                staticSection.style.display = 'block';
-                staticSection.innerHTML = `<h4>صفحة مخصصة نشطة 📄 [ ${activePage} ]</h4><p style="margin-top:5px;">هذه هي بيئة عرض الصفحة المطلوبة والمبنية بأسلوب شجرة الصفحات الفعالة بنجاح تام.</p>`;
+                liveSection.style.display = 'none'; staticSection.style.display = 'block';
+                staticSection.innerHTML = `<h4>مساحة العرض التعريفية لصفحة 📄 [ ${activePage} ]</h4><p style="margin-top:5px;">هذه بيئة تخصيص الصفحة المفتوحة والمبنية شجرياً بأسلوب جوجل سايتس الفعال المصلح بالكامل.</p>`;
                 return;
             }
 
@@ -739,19 +764,13 @@
             const mainCat = document.getElementById('main-cat-select').value;
             const activeSub = document.getElementById('sub-cat-select').value;
             
-            const filtersDiv = document.getElementById('prev-subcat-filters');
-            filtersDiv.innerHTML = '';
-
+            const filtersDiv = document.getElementById('prev-subcat-filters'); filtersDiv.innerHTML = '';
             let targetSubcats = [];
-            if(mainCat === 'all_cats') {
-                targetSubcats = ['شرقي فاخر', 'تورت وكيك', 'كرواسون باتيسري', 'خبز ريفي'];
-            } else {
-                targetSubcats = productsData[mainCat].subcats;
-            }
+            if(mainCat === 'all_cats') { targetSubcats = ['شرقي فاخر', 'تورت وكيك', 'كرواسون باتيسري', 'خبز ريفي']; } 
+            else { targetSubcats = productsData[mainCat].subcats; }
 
             const isAllSubsActive = (activeSub === 'all_subs') ? 'active' : '';
             filtersDiv.innerHTML += `<div class="filter-chip ${isAllSubsActive}" onclick="document.getElementById('sub-cat-select').value='all_subs'; updateLiveCanvas();">✨ عرض الكل</div>`;
-
             targetSubcats.forEach(sub => {
                 const isActive = (sub === activeSub) ? 'active' : '';
                 filtersDiv.innerHTML += `<div class="filter-chip ${isActive}" onclick="document.getElementById('sub-cat-select').value='${sub}'; updateLiveCanvas();">${sub}</div>`;
@@ -778,9 +797,7 @@
             let allItemsToRender = [];
             if(mainCat === 'all_cats') {
                 Object.keys(productsData).forEach(cat => { allItemsToRender = allItemsToRender.concat(productsData[cat].items); });
-            } else {
-                allItemsToRender = productsData[mainCat].items;
-            }
+            } else { allItemsToRender = productsData[mainCat].items; }
 
             if(activeSub !== 'all_subs') { allItemsToRender = allItemsToRender.filter(item => item.sub === activeSub); }
 
@@ -809,9 +826,7 @@
                 if(applyDiscountToThisProduct) {
                     const newPrice = Math.round(item.price * (1 - (discountPercent / 100)));
                     priceHTML = `<span class="current-price">${newPrice} ج.م</span><span class="old-price">${item.price} ج.م</span>`;
-                } else {
-                    priceHTML = `<span class="current-price">${item.price} ج.م</span>`;
-                }
+                } else { priceHTML = `<span class="current-price">${item.price} ج.م</span>`; }
 
                 gridDiv.innerHTML += `
                     <div class="product-card">
@@ -821,8 +836,7 @@
                             <div class="price-container">${priceHTML}</div>
                             <button class="btn-add-to-cart" onclick="event.stopPropagation(); alert('تم إضافة المنتج بنجاح!')">أضف إلى السلة</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
@@ -830,8 +844,7 @@
             document.getElementById('modal-url-display').innerText = document.getElementById('base-url').value;
             const canvasClone = document.getElementById('canvas-store-zone').cloneNode(true);
             const modalZone = document.getElementById('modal-render-zone');
-            modalZone.innerHTML = '';
-            modalZone.appendChild(canvasClone);
+            modalZone.innerHTML = ''; modalZone.appendChild(canvasClone);
             
             const clonedBurger = modalZone.querySelector('.burger-menu');
             if(clonedBurger) {
@@ -844,10 +857,7 @@
             document.getElementById('fullScreenModal').style.display = 'flex';
         }
 
-        function closeFullScreenPreview() {
-            document.getElementById('fullScreenModal').style.display = 'none';
-            updateLiveCanvas();
-        }
+        function closeFullScreenPreview() { document.getElementById('fullScreenModal').style.display = 'none'; updateLiveCanvas(); }
     </script>
 </body>
 </html>
